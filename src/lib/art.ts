@@ -1,14 +1,8 @@
 /**
- * Canvas drawing for the site.
- *
- * - the 3D hero sheet: birch bark, ink and the red seal (the only words are his name)
- * - the plates: neither of Qamar's sites has photographs of his works, so each plate is
- *   drawn from what the sites DO say: the medium, the size, and his own statement.
- *   They are illustrations, not photographs. A `photo` in src/data/works.ts replaces one.
- *   No invented words: marks are made with a simulated broad-nib pen, and the only text
- *   is a phrase from his own statement.
+ * Canvas drawing for the 3D hero sheet: birch bark, ink and the red seal.
+ * The sheet is a drawn object that evokes his surface; it is not one of his works,
+ * and the only writing on it is his own name.
  */
-import { mulberry32 } from "./rng";
 
 export const SCRIPT_FONT = '"Aref Ruqaa", "Amiri", "Noto Nastaliq Urdu", serif';
 const TAU = Math.PI * 2;

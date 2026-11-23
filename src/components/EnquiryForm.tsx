@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { enquiryKinds, site } from "@/data/site";
-import { worksByNo } from "@/data/works";
+import { mediumOf, worksByNo } from "@/data/works";
 import { Label } from "./ui";
 
 type Status = "idle" | "sending" | "sent" | "mailto" | "error";
@@ -22,7 +22,7 @@ export default function EnquiryForm() {
 
   const needsBudget = kind === enquiryKinds[1];
   const initialMessage = useMemo(
-    () => (work ? `I would like to ask about plate ${work.no} (${work.size}, ${work.medium}).\n\n` : ""),
+    () => (work ? `I would like to ask about no. ${work.no}, ${work.title} (${work.size}, ${mediumOf(work)}).\n\n` : ""),
     [work],
   );
 
@@ -35,7 +35,7 @@ export default function EnquiryForm() {
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
       budget: String(fd.get("budget") || ""),
-      work: work ? `Plate ${work.no}` : "",
+      work: work ? `No. ${work.no}, ${work.title}` : "",
       message: String(fd.get("message") || ""),
       company: String(fd.get("company") || ""), // honeypot
     };
@@ -127,7 +127,7 @@ export default function EnquiryForm() {
 
       {work && (
         <p className="m-0 border-l-2 border-seal pl-3 font-mono text-[0.74rem] uppercase tracking-[0.08em] text-ink-2">
-          About plate {work.no} · {work.size} · {work.medium}
+          About no. {work.no} · {work.title} · {work.size} · {mediumOf(work)}
         </p>
       )}
 

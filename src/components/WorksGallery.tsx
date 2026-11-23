@@ -1,25 +1,27 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { groups, selected, works, type Group, type Work } from "@/data/works";
+import { series } from "@/data/series";
+import { selected, works, type SeriesId, type Work } from "@/data/works";
 import Plate from "./Plate";
 import Lightbox from "./Lightbox";
 
-/** The plates in a masonry grid, with filters. `only="selected"` shows the six used on the home page. */
+/** The works in a masonry grid, with a filter per series. `only="selected"` shows the eight used on the home page. */
 export default function WorksGallery({ only }: { only?: "selected" }) {
-  const [filter, setFilter] = useState<"all" | Group>("all");
+  const [filter, setFilter] = useState<"all" | SeriesId>("all");
   const [open, setOpen] = useState<number | null>(null);
 
   const base: Work[] = only === "selected" ? selected : works;
-  const list = useMemo(() => (filter === "all" ? base : base.filter((w) => w.group === filter)), [filter, base]);
-  const count = (id: "all" | Group) => (id === "all" ? works.length : works.filter((w) => w.group === id).length);
+  const list = useMemo(() => (filter === "all" ? base : base.filter((w) => w.series === filter)), [filter, base]);
+  const count = (id: "all" | SeriesId) => (id === "all" ? works.length : works.filter((w) => w.series === id).length);
   const close = useCallback(() => setOpen(null), []);
+  const chips: { id: "all" | SeriesId; label: string }[] = [{ id: "all", label: "All works" }, ...series.map((s) => ({ id: s.id, label: s.title }))];
 
   return (
     <>
       {!only && (
         <div role="group" aria-label="Filter works" className="flex flex-wrap gap-x-5 gap-y-1 border-b border-line pb-3.5">
-          {groups.map((g) => (
+          {chips.map((g) => (
             <button
               key={g.id}
               type="button"
@@ -41,7 +43,7 @@ export default function WorksGallery({ only }: { only?: "selected" }) {
         {list.map((w, i) => (
           <div
             key={w.no}
-            style={{ animationDelay: `${i * 45}ms` }}
+            style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
             className="mb-[clamp(36px,5vw,72px)] break-inside-avoid animate-rise"
           >
             <Plate work={w} onOpen={() => setOpen(i)} />

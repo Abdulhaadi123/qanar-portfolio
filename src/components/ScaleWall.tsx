@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { groups, works, type Group } from "@/data/works";
+import { series } from "@/data/series";
+import { hasSize, mediumOf, works, type SeriesId } from "@/data/works";
 import Wall, { FIG } from "./Wall";
 import { Btn, Label } from "./ui";
 
+const sized = works.filter(hasSize);
+
 /** The list of works beside a wall that shows the chosen one at its real size. */
 export default function ScaleWall() {
-  const [filter, setFilter] = useState<"all" | Group>("all");
-  const [active, setActive] = useState("01");
+  const [filter, setFilter] = useState<"all" | SeriesId>("all");
+  const [active, setActive] = useState(sized[0].no);
   const [touched, setTouched] = useState(false);
   const [inView, setInView] = useState(false);
   const wallBox = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const list = useMemo(() => (filter === "all" ? works : works.filter((w) => w.group === filter)), [filter]);
+  const list = useMemo(() => (filter === "all" ? sized : sized.filter((w) => w.series === filter)), [filter]);
   const work = list.find((w) => w.no === active) ?? list[0];
-  const count = (id: "all" | Group) => (id === "all" ? works.length : works.filter((w) => w.group === id).length);
+  const count = (id: "all" | SeriesId) => (id === "all" ? sized.length : sized.filter((w) => w.series === id).length);
 
   useEffect(() => {
     const el = wallBox.current;
@@ -35,7 +38,7 @@ export default function ScaleWall() {
         const i = list.findIndex((w) => w.no === cur);
         return list[(i + 1) % list.length].no;
       });
-    }, 2600);
+    }, 2800);
     return () => clearInterval(t);
   }, [touched, inView, list]);
 
@@ -53,18 +56,20 @@ export default function ScaleWall() {
     listRef.current?.querySelector<HTMLButtonElement>(`[data-no="${next.no}"]`)?.focus();
   };
 
+  const chips: { id: "all" | SeriesId; label: string }[] = [{ id: "all", label: "All" }, ...series.map((s) => ({ id: s.id, label: s.title }))];
+
   return (
     <div className="grid grid-cols-1 gap-x-[clamp(32px,5vw,96px)] gap-y-10 lg:grid-cols-12">
       <div className="order-2 lg:order-1 lg:col-span-6">
         <div role="group" aria-label="Filter works" className="mb-2 flex flex-wrap gap-x-5 gap-y-1 pb-3">
-          {groups.map((g) => (
+          {chips.map((g) => (
             <button
               key={g.id}
               type="button"
               aria-pressed={filter === g.id}
               onClick={() => {
                 setFilter(g.id);
-                choose((g.id === "all" ? works : works.filter((x) => x.group === g.id))[0].no);
+                choose((g.id === "all" ? sized : sized.filter((x) => x.series === g.id))[0].no);
               }}
               className="relative py-1.5 font-mono text-[0.72rem] uppercase tracking-[0.1em] text-ink-3 transition-colors aria-pressed:text-ink aria-pressed:after:absolute aria-pressed:after:inset-x-0 aria-pressed:after:-bottom-0.5 aria-pressed:after:h-0.5 aria-pressed:after:bg-seal"
             >
@@ -73,7 +78,7 @@ export default function ScaleWall() {
             </button>
           ))}
         </div>
-        <ul ref={listRef} onKeyDown={onKey} className="m-0 list-none border-t border-line-strong p-0">
+        <ul ref={listRef} onKeyDown={onKey} className="m-0 max-h-[640px] list-none overflow-y-auto border-t border-line-strong p-0">
           {list.map((x) => (
             <li key={x.no}>
               <button
@@ -86,12 +91,12 @@ export default function ScaleWall() {
                   choose(x.no);
                   if (window.innerWidth < 1024) wallBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
-                className="group/row grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-l-2 border-b-line border-l-transparent py-3.5 pl-2 pr-1 text-left transition-[background-color,border-color,padding] duration-300 hover:bg-paper-2/70 aria-[current=true]:border-l-seal aria-[current=true]:bg-paper-2 aria-[current=true]:pl-4"
+                className="group/row grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-l-2 border-b-line border-l-transparent py-3 pl-2 pr-1 text-left transition-[background-color,border-color,padding] duration-300 hover:bg-paper-2/70 aria-[current=true]:border-l-seal aria-[current=true]:bg-paper-2 aria-[current=true]:pl-4"
               >
                 <span className="font-mono text-[0.78rem] text-ink-3 group-aria-[current=true]/row:text-ink">{x.no}</span>
                 <span className="min-w-0">
-                  <span className="block font-display text-[1.2rem] tracking-[-0.01em]">{x.title}</span>
-                  <span className="block truncate font-mono text-[0.66rem] uppercase tracking-[0.08em] text-ink-3">{x.medium}</span>
+                  <span className="block font-display text-[1.15rem] tracking-[-0.01em]">{x.title}</span>
+                  <span className="block truncate font-mono text-[0.66rem] uppercase tracking-[0.08em] text-ink-3">{mediumOf(x)}</span>
                 </span>
                 <span className="whitespace-nowrap font-mono text-[0.78rem] text-ink-2">{x.size}</span>
               </button>
@@ -113,7 +118,7 @@ export default function ScaleWall() {
               <Label>Price on request</Label>
             </div>
             <p className="m-0 mt-1 text-[0.95rem] text-ink-2">
-              {work.medium} · {work.size}
+              {mediumOf(work)} · {work.size}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Btn href={`/contact?work=${work.no}`}>Enquire about this work</Btn>

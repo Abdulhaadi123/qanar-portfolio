@@ -33,11 +33,23 @@ export default function ContactPage() {
             <aside className="lg:col-span-5">
               <R>
                 <Label>Direct</Label>
-                <p className="mt-3 text-[1.1rem]">
-                  <a href={`mailto:${site.email}`} className={ulink}>
-                    {site.email}
-                  </a>
-                </p>
+                <ul className="m-0 mt-3 list-none space-y-1 p-0 text-[1.1rem]">
+                  <li>
+                    <a href={`mailto:${site.email}`} className={ulink}>
+                      {site.email}
+                    </a>
+                  </li>
+                  <li>
+                    <a href={`mailto:${site.email2}`} className={ulink}>
+                      {site.email2}
+                    </a>
+                  </li>
+                  <li>
+                    <a href={`tel:${site.phoneHref}`} className={ulink}>
+                      {site.phone}
+                    </a>
+                  </li>
+                </ul>
                 <Label className="mt-8">Studio</Label>
                 <address className="mt-3 not-italic leading-relaxed text-ink-2">
                   {site.studio.map((l) => (
@@ -46,6 +58,13 @@ export default function ContactPage() {
                     </span>
                   ))}
                   <span className="block">Lahore, Pakistan</span>
+                </address>
+                <address className="mt-3 not-italic leading-relaxed text-ink-2">
+                  {site.studio2.map((l) => (
+                    <span key={l} className="block">
+                      {l}
+                    </span>
+                  ))}
                 </address>
                 <Label className="mt-8">Elsewhere</Label>
                 <ul className="m-0 mt-3 list-none space-y-1 p-0 text-ink-2">

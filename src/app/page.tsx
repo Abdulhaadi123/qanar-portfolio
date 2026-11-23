@@ -7,7 +7,7 @@ import SeriesList from "@/components/SeriesList";
 import PostRows from "@/components/PostRows";
 import Timeline from "@/components/Timeline";
 import { Btn, Label, Lines, R, Section, SectionLabel, Wrap, ulink } from "@/components/ui";
-import { bio, commissionSteps, recognition, site, statement, teaching } from "@/data/site";
+import { bio, career, commissionSteps, site, statement, teaching } from "@/data/site";
 import { works } from "@/data/works";
 
 function Head({ no, label, title, right }: { no: string; label: string; title: ReactNode[]; right?: ReactNode }) {
@@ -56,10 +56,10 @@ export default function Home() {
               <R delay={160}>
                 <dl className="m-0 mt-10 border-t border-ink/40">
                   {[
+                    ["Born", `${site.born}, ${site.origin}`],
                     ["Based in", site.base],
-                    ["From", site.origin],
-                    ["Education", "BFA Painting, National College of Arts, Lahore (2020)"],
-                    ["Recognition", "New York Olympic of Art, Artiade Organization (2024)"],
+                    ["Education", "Fine Arts, painting: National College of Arts, Lahore (2020)"],
+                    ["Recognition", "Winner, Asia Pacific Regional Art Contest (2022)"],
                   ].map(([k, v]) => (
                     <div key={k} className="grid grid-cols-[110px_1fr] gap-4 border-b border-ink/20 py-3">
                       <dt className="font-mono text-[0.7rem] uppercase tracking-[0.1em] text-ink-2">{k}</dt>
@@ -94,14 +94,14 @@ export default function Home() {
               </R>
               <R delay={120} className="mt-12 grid gap-x-10 gap-y-6 border-t border-line-strong pt-8 md:grid-cols-2">
                 <p className="m-0 max-w-[52ch] text-ink-2">{statement[1]}</p>
-                <p className="m-0 max-w-[52ch] text-ink-2">{recognition}</p>
+                <p className="m-0 max-w-[52ch] text-ink-2">{career[0]}</p>
               </R>
             </div>
           </div>
         </Wrap>
       </Section>
 
-      {/* 03 — the works, at true size */}
+      {/* 03 — selected works */}
       <Section className="border-t border-line">
         <Wrap>
           <div className="mb-[clamp(32px,4vw,64px)]">
@@ -117,9 +117,6 @@ export default function Home() {
             />
           </div>
           <WorksGallery only="selected" />
-          <p className="mt-2 font-mono text-[0.7rem] uppercase tracking-[0.08em] text-ink-3">
-            {works.length} works in all, with sizes and media as listed by the artist. Plates are illustrations drawn from each medium.
-          </p>
         </Wrap>
       </Section>
 
@@ -127,7 +124,7 @@ export default function Home() {
       <Section className="border-t border-line">
         <Wrap>
           <div className="mb-[clamp(32px,4vw,64px)]">
-            <Head no="04" label="Bodies of work" title={["Three ways", em("of making")]} />
+            <Head no="04" label="Four series" title={["Four ways", em("of looking")]} />
           </div>
           <SeriesList />
         </Wrap>
@@ -138,7 +135,7 @@ export default function Home() {
         <Wrap>
           <div className="grid grid-cols-1 gap-x-[clamp(32px,6vw,110px)] gap-y-16 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <SectionLabel no="05">Record</SectionLabel>
+              <SectionLabel no="05">Exhibitions &amp; record</SectionLabel>
               <div className="mt-8">
                 <Timeline />
               </div>

@@ -12,23 +12,25 @@ npm run build
 
 | What | File |
 |---|---|
-| Words (bio, statement, record, teaching, links) | `src/data/site.ts` |
-| The 17 works: sizes (cm), media | `src/data/works.ts` |
+| Words (bio, exhibitions, record, teaching, contact) | `src/data/site.ts` |
+| The four series and their statements | `src/data/series.ts` |
+| The 39 works: titles, sizes, media, photo path | `src/data/works.ts` |
+| Photographs of the works | `public/works/NN.webp` |
 | Journal articles | `src/data/journal.ts` |
 | Where each piece of content came from | `CONTENT-SOURCES.md` |
 | 3D birch-bark sheet in the hero | `src/components/BarkCanvas.tsx`, `src/lib/bark.ts` |
-| True-scale catalogue wall | `src/components/ScaleWall.tsx` |
+| True-size wall | `src/components/Wall.tsx`, `ScaleWall.tsx` |
 
-## Adding the real photographs
+## Changing or adding a work
 
-Until they exist, every work has a generated plate in `public/works/NN.webp` (drawn from its medium and size by `src/lib/plates.ts`).
-To use a real photograph, overwrite that file with the photo (same name, any size), or change `photo` in `src/data/works.ts`.
-The gallery, the viewer and the true-size wall switch over by themselves. The share card is `src/app/opengraph-image.jpg`.
+Overwrite `public/works/NN.webp` with a better photograph (same name, any size), or edit its line in `src/data/works.ts`
+(title, size, medium, `photo`). Set `hCm` and `wCm` to `null` for works with no fixed size; they stay in the gallery but not on the wall.
 
 ## Portrait
 
 `public/media/portrait.jpg` (from his Wix site). Replace it with the original photograph for the best quality.
 If that file is missing the site falls back to the Wix image, then to his name in calligraphy (`src/data/site.ts → portrait`).
+The share card is `src/app/opengraph-image.jpg` (also used for Twitter).
 
 ## Contact form
 

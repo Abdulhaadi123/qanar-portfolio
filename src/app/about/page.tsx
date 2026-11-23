@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Portrait from "@/components/Portrait";
 import Timeline from "@/components/Timeline";
 import { Btn, Label, Lines, PageHead, R, Section, SectionLabel, Wrap, ulink } from "@/components/ui";
-import { bio, recognition, site, statement, teaching } from "@/data/site";
+import { alsoOnWix, bio, career, site, statement, teaching } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Qamar Abbas: BFA Painting, National College of Arts, Lahore (2020). Echoes on Birch, conceptual work, embroidery, and teaching.",
+    "Qamar Abbas, born 1997 in the Oshikhandass valley of Gilgit-Baltistan. Fine Arts at the National College of Arts, Lahore (2020). Exhibitions, awards and teaching.",
 };
 
 export default function AboutPage() {
@@ -26,9 +26,9 @@ export default function AboutPage() {
               <Portrait className="aspect-[4/5] w-full" />
               <dl className="m-0 mt-6 border-t border-line-strong">
                 {[
+                  ["Born", `${site.born}, ${site.origin}`],
                   ["Based in", site.base],
-                  ["From", site.origin],
-                  ["Studio", "Q Art studio"],
+                  ["Studio", site.studio[0]],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-5 border-b border-line py-2.5">
                     <dt className="font-mono text-[0.7rem] uppercase tracking-[0.1em] text-ink-3">{k}</dt>
@@ -42,18 +42,27 @@ export default function AboutPage() {
               <R>
                 <p className="m-0 font-display text-[clamp(1.4rem,2.4vw,2.2rem)] font-[330] leading-[1.3] tracking-[-0.012em]">{bio}</p>
               </R>
-              <R delay={100} className="mt-12">
+              <R delay={100} className="mt-10">
+                <div className="flex flex-col gap-5 text-[1.05rem] text-ink-2">
+                  {career.map((p) => (
+                    <p key={p} className="m-0 max-w-[62ch]">
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </R>
+              <R delay={160} className="mt-12">
                 <Label>Artist statement</Label>
-                <div className="mt-4 space-y-5 text-[1.05rem] text-ink-2">
+                <div className="mt-4 flex flex-col gap-5 text-[1.05rem] text-ink-2">
                   {statement.map((p) => (
                     <p key={p} className="m-0 max-w-[62ch]">
                       {p}
                     </p>
                   ))}
-                  <p className="m-0 max-w-[62ch]">{recognition}</p>
+                  <p className="m-0 max-w-[62ch]">{alsoOnWix}</p>
                 </div>
               </R>
-              <R delay={160} className="mt-10 flex flex-wrap gap-3">
+              <R delay={200} className="mt-10 flex flex-wrap gap-3">
                 <Btn href="/works" solid>
                   View the works
                 </Btn>
@@ -70,7 +79,7 @@ export default function AboutPage() {
         <Wrap>
           <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-12">
             <div className="lg:col-span-3">
-              <SectionLabel no="02">Record</SectionLabel>
+              <SectionLabel no="02">Exhibitions &amp; record</SectionLabel>
             </div>
             <div className="lg:col-span-9">
               <Timeline />

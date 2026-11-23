@@ -1,19 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ratioOf, seedOf, styleOf, works as allWorks, type Work } from "@/data/works";
-import PlateCanvas from "./PlateCanvas";
+import { seriesById } from "@/data/series";
+import { hasSize, mediumOf, works as allWorks, type Work } from "@/data/works";
+import Photo from "./Photo";
 import Wall from "./Wall";
 import { Btn, Label } from "./ui";
 
-const seriesName: Record<Work["group"], string> = {
-  birch: "Echoes on Birch",
-  marker: "Marker on paper",
-  watercolour: "Watercolour",
-  other: "Medium not listed",
-};
-
-/** One plate, large, with its details and its size on a wall. Esc closes, ← → move on. */
+/** One work, large, with its details and its size on a wall. Esc closes, ← → move on. */
 export default function Lightbox({
   items,
   index,
@@ -27,7 +21,7 @@ export default function Lightbox({
 }) {
   const work = items[index];
   const closeBtn = useRef<HTMLButtonElement>(null);
-  const ratio = ratioOf(work);
+  const s = seriesById(work.series);
 
   useEffect(() => {
     const prevFocus = document.activeElement as HTMLElement | null;
@@ -53,7 +47,7 @@ export default function Lightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Plate ${work.no}`}
+      aria-label={`${work.title}, no. ${work.no}`}
       className="fixed inset-0 z-90 grid animate-fade grid-cols-1 gap-8 overflow-auto bg-paper/95 px-gutter pb-8 pt-[clamp(64px,8vh,92px)] backdrop-blur-sm lg:grid-cols-[minmax(0,1fr)_minmax(300px,400px)] lg:gap-[clamp(24px,4vw,72px)]"
     >
       <button
@@ -69,29 +63,24 @@ export default function Lightbox({
         <div
           key={work.no}
           onClick={(e) => e.stopPropagation()}
-          style={{ width: `min(100%, calc((100svh - 190px) * ${ratio}))` }}
-          className="animate-rise drop-shadow-[0_26px_30px_rgba(70,50,30,0.28)]"
+          style={{ width: `min(100%, calc((100svh - 190px) * ${work.ratio}))` }}
+          className="animate-rise shadow-[0_26px_40px_rgba(70,50,30,0.28)]"
         >
-          <PlateCanvas
-            style={styleOf(work)}
-            seed={seedOf(work)}
-            ratio={ratio}
-            photo={work.photo}
-            alt={`Plate ${work.no}: ${work.medium}, ${work.size}`}
-            maxW={1100}
-          />
+          <Photo src={work.photo} ratio={work.ratio} alt={`${work.title}, ${mediumOf(work)}, ${work.size}`} eager />
         </div>
       </div>
 
       <aside className="flex flex-col gap-5 self-start lg:self-center">
         <Label>
-          Plate <b className="text-ink">{work.no}</b> / {String(allWorks.length).padStart(2, "0")}
+          No. <b className="text-ink">{work.no}</b> / {String(allWorks.length).padStart(2, "0")}
         </Label>
         <h2 className="m-0 font-display text-[clamp(2rem,3.4vw,3rem)] font-[340] leading-none tracking-[-0.03em]">{work.title}</h2>
         <dl className="m-0 border-t border-line-strong">
           <div className={row}>
             <dt className={dt}>Series</dt>
-            <dd className="m-0 text-right">{seriesName[work.group]}</dd>
+            <dd className="m-0 text-right">
+              {s.kind} · {s.title}
+            </dd>
           </div>
           <div className={row}>
             <dt className={dt}>Size</dt>
@@ -99,21 +88,27 @@ export default function Lightbox({
           </div>
           <div className={row}>
             <dt className={dt}>Medium</dt>
-            <dd className="m-0 text-right">{work.medium}</dd>
+            <dd className="m-0 text-right">{mediumOf(work)}</dd>
           </div>
           <div className={row}>
-            <dt className={dt}>Gallery price</dt>
-            <dd className="m-0 text-right">On request</dd>
+            <dt className={dt}>Price</dt>
+            <dd className="m-0 text-right">{work.note === "Not available" ? "Not available" : "On request"}</dd>
           </div>
+          {work.note && work.note !== "Not available" && (
+            <div className={row}>
+              <dt className={dt}>Note</dt>
+              <dd className="m-0 text-right">{work.note}</dd>
+            </div>
+          )}
         </dl>
-        <Wall work={work} />
+        {hasSize(work) && <Wall work={work} />}
         <div className="flex flex-wrap items-center gap-3">
           <Btn href={`/contact?work=${work.no}`} solid>
             Enquire about this work
           </Btn>
           <button
             type="button"
-            aria-label="Previous plate"
+            aria-label="Previous work"
             onClick={() => onIndex((index - 1 + items.length) % items.length)}
             className="border border-ink px-5 py-[0.8em] font-mono text-[0.8rem] transition-colors hover:bg-ink hover:text-paper"
           >
@@ -121,7 +116,7 @@ export default function Lightbox({
           </button>
           <button
             type="button"
-            aria-label="Next plate"
+            aria-label="Next work"
             onClick={() => onIndex((index + 1) % items.length)}
             className="border border-ink px-5 py-[0.8em] font-mono text-[0.8rem] transition-colors hover:bg-ink hover:text-paper"
           >
@@ -132,3 +127,4 @@ export default function Lightbox({
     </div>
   );
 }
+

@@ -13,7 +13,7 @@ import RevealRoot from "@/components/RevealRoot";
 import { site } from "@/data/site";
 
 const description =
-  "Qamar Abbas is a visual artist and art educator based in Lahore, from the Oshikhandass valley in Gilgit-Baltistan. Calligraphy on paper birch (Bhojpatra), landscape and cultural memory.";
+  "Qamar Abbas is a visual artist born in 1997 in the Oshikhandass valley of Gilgit-Baltistan, based in Lahore. Birch bark and ink, constitution and currency, charcoal portraits of the mountain people, and embroidery.";
 
 export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : undefined,
