@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/*
+  Design tokens only. Every component is styled with Tailwind utilities.
+  Warm paper ground, ink-black type, one vermilion seal colour.
+*/
+@theme {
+  --color-paper: #f1ece1;
+  --color-paper-2: #e9e2d3;
+  --color-bark: #d8cdb8;
+  --color-ink: #17120f;
+  --color-ink-2: #4b4339;
+  --color-ink-3: #85796b;
+  --color-seal: #b23a2b;
+  --color-line: rgb(23 18 15 / 0.16);
+  --color-line-strong: rgb(23 18 15 / 0.5);
+
+  --font-display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Inter Tight Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, Menlo, monospace;
+  --font-script: "Aref Ruqaa", "Amiri", serif;
+  --font-urdu: "Noto Nastaliq Urdu", "Aref Ruqaa", serif;
+
+  --spacing-gutter: clamp(20px, 4.2vw, 64px);
+  --spacing-head: 68px;
+
+  --ease-expo: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  --animate-rise: rise 0.8s var(--ease-expo) both;
+  --animate-fade: fade 0.45s ease both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-drip: drip 2.2s var(--ease-expo) infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes drip {
+    0% {
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    45% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+    55% {
+      transform: scaleY(1);
+      transform-origin: bottom;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-seal);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-seal);
+    outline-offset: 3px;
+  }
+  button {
+    cursor: pointer;
+  }
+}
