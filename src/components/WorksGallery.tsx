@@ -6,12 +6,12 @@ import { selected, works, type SeriesId, type Work } from "@/data/works";
 import Plate from "./Plate";
 import Lightbox from "./Lightbox";
 
-/** The works in a masonry grid, with a filter per series. `only="selected"` shows the eight used on the home page. */
-export default function WorksGallery({ only }: { only?: "selected" }) {
+/** The works in a masonry grid. With no props it has a filter per series; `seriesId` shows one series (two columns). */
+export default function WorksGallery({ only, seriesId }: { only?: "selected"; seriesId?: SeriesId }) {
   const [filter, setFilter] = useState<"all" | SeriesId>("all");
   const [open, setOpen] = useState<number | null>(null);
 
-  const base: Work[] = only === "selected" ? selected : works;
+  const base: Work[] = only === "selected" ? selected : seriesId ? works.filter((w) => w.series === seriesId) : works;
   const list = useMemo(() => (filter === "all" ? base : base.filter((w) => w.series === filter)), [filter, base]);
   const count = (id: "all" | SeriesId) => (id === "all" ? works.length : works.filter((w) => w.series === id).length);
   const close = useCallback(() => setOpen(null), []);
@@ -19,7 +19,7 @@ export default function WorksGallery({ only }: { only?: "selected" }) {
 
   return (
     <>
-      {!only && (
+      {!only && !seriesId && (
         <div role="group" aria-label="Filter works" className="flex flex-wrap gap-x-5 gap-y-1 border-b border-line pb-3.5">
           {chips.map((g) => (
             <button
@@ -38,7 +38,7 @@ export default function WorksGallery({ only }: { only?: "selected" }) {
 
       <div
         key={filter}
-        className={`${only ? "" : "mt-[clamp(28px,3.5vw,48px)]"} columns-1 gap-x-[clamp(20px,3vw,52px)] sm:columns-2 lg:columns-3`}
+        className={`${only || seriesId ? "" : "mt-[clamp(28px,3.5vw,48px)]"} columns-1 gap-x-[clamp(20px,3vw,52px)] sm:columns-2 ${seriesId ? "" : "lg:columns-3"}`}
       >
         {list.map((w, i) => (
           <div

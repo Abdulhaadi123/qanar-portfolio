@@ -2,7 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import Hero from "@/components/Hero";
 import Portrait from "@/components/Portrait";
-import WorksGallery from "@/components/WorksGallery";
+import Marquee from "@/components/Marquee";
+import ScrollText from "@/components/ScrollText";
+import SelectedArc from "@/components/SelectedArc";
+import Stats from "@/components/Stats";
 import SeriesList from "@/components/SeriesList";
 import PostRows from "@/components/PostRows";
 import Timeline from "@/components/Timeline";
@@ -36,6 +39,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <Stats />
 
       {/* 01 — the artist, with his portrait */}
       <section className="bg-[#d8c8a5] py-[clamp(64px,8vw,120px)]">
@@ -89,9 +93,10 @@ export default function Home() {
               <SectionLabel no="02">Artist statement</SectionLabel>
             </div>
             <div className="lg:col-span-9">
-              <R>
-                <p className="m-0 max-w-[30em] font-display text-[clamp(1.7rem,3.3vw,3.2rem)] font-[320] leading-[1.18] tracking-[-0.02em]">{statement[0]}</p>
-              </R>
+              <ScrollText
+                text={statement[0]}
+                className="m-0 max-w-[30em] font-display text-[clamp(1.7rem,3.3vw,3.2rem)] font-[320] leading-[1.18] tracking-[-0.02em]"
+              />
               <R delay={120} className="mt-12 grid gap-x-10 gap-y-6 border-t border-line-strong pt-8 md:grid-cols-2">
                 <p className="m-0 max-w-[52ch] text-ink-2">{statement[1]}</p>
                 <p className="m-0 max-w-[52ch] text-ink-2">{career[0]}</p>
@@ -101,8 +106,10 @@ export default function Home() {
         </Wrap>
       </Section>
 
+      <Marquee />
+
       {/* 03 — selected works */}
-      <Section className="border-t border-line">
+      <Section>
         <Wrap>
           <div className="mb-[clamp(32px,4vw,64px)]">
             <Head
@@ -116,7 +123,7 @@ export default function Home() {
               }
             />
           </div>
-          <WorksGallery only="selected" />
+          <SelectedArc />
         </Wrap>
       </Section>
 

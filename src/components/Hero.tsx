@@ -75,11 +75,15 @@ export default function Hero() {
           aria-hidden
           className={`pointer-events-none absolute inset-0 grid place-items-center transition-opacity duration-700 ${ready ? "opacity-0" : ""}`}
         >
-          <div className="ml-[min(38vw,520px)] grid aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 place-items-center bg-[repeating-linear-gradient(0deg,rgb(60_44_32/0.07)_0_1px,transparent_1px_7px),linear-gradient(160deg,#f4eddf,#e6dbc4_60%,#d8c9ac)] drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]">
-            <span lang="ur" dir="rtl" className="font-script text-[clamp(3rem,9vh,6rem)]">
-              قمر
-            </span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/media/hero-bark.webp"
+            alt=""
+            width={1024}
+            height={1536}
+            fetchPriority="high"
+            className="ml-[min(38vw,520px)] aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 object-cover drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]"
+          />
         </div>
 
         <div className="absolute inset-0">

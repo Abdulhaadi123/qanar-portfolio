@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ScaleWall from "@/components/ScaleWall";
 import WorksGallery from "@/components/WorksGallery";
-import Photo from "@/components/Photo";
 import { Btn, Label, Lines, PageHead, R, Section, SectionLabel, Wrap } from "@/components/ui";
 import { series } from "@/data/series";
 import { site } from "@/data/site";
-import { hasSize, worksByNo, worksOf, works } from "@/data/works";
+import { hasSize, worksOf, works } from "@/data/works";
 
 export const metadata: Metadata = {
   title: "Works",
@@ -31,30 +31,44 @@ export default function WorksPage() {
         </p>
       </PageHead>
 
-      <section className="pb-[clamp(56px,7vw,100px)]">
-        <Wrap>
-          <WorksGallery />
-        </Wrap>
-      </section>
+      {/* index of the four series */}
+      <Wrap className="pb-[clamp(24px,3vw,40px)]">
+        <nav aria-label="Series" className="grid grid-cols-1 border-t border-line-strong sm:grid-cols-2 lg:grid-cols-4">
+          {series.map((s, i) => (
+            <Link
+              key={s.id}
+              href={`#${s.slug}`}
+              className="group/idx flex items-baseline justify-between gap-4 border-b border-line py-4 pr-4 transition-colors duration-300 hover:text-seal lg:border-b-0 lg:border-r lg:px-5 lg:first:pl-0 lg:last:border-r-0"
+            >
+              <span>
+                <Label>{s.kind}</Label>
+                <span className="mt-1 block font-display text-[1.3rem] tracking-[-0.015em]">{s.title}</span>
+              </span>
+              <span className="font-mono text-[0.74rem] text-ink-3 transition-transform duration-300 group-hover/idx:translate-y-0.5">
+                {worksOf(s.id).length} ↓
+              </span>
+              <span className="sr-only">{i + 1}</span>
+            </Link>
+          ))}
+        </nav>
+      </Wrap>
 
-      {/* the four series, with his statements */}
+      {/* each series: its statement stays in view while its works scroll past */}
       {series.map((s, i) => {
         const items = worksOf(s.id);
-        const shots = [s.cover, ...items.map((w) => w.no).filter((n) => n !== s.cover)].slice(0, 3).map((n) => worksByNo(n)!);
         return (
-          <Section key={s.id} id={s.slug} className="scroll-mt-24 border-t border-line">
+          <Section key={s.id} id={s.slug} className="scroll-mt-20 border-t border-line">
             <Wrap>
-              <div className="grid grid-cols-1 items-start gap-x-[clamp(32px,6vw,100px)] gap-y-10 lg:grid-cols-12">
-                <div className="lg:col-span-3">
+              <div className="grid grid-cols-1 items-start gap-x-[clamp(32px,5vw,88px)] gap-y-10 lg:grid-cols-12">
+                <div className="lg:sticky lg:top-[calc(var(--spacing-head)+28px)] lg:col-span-5">
                   <SectionLabel no={`0${i + 2}`}>{s.kind}</SectionLabel>
-                  <Label className="mt-4">{items.length} works</Label>
-                </div>
-                <div className="lg:col-span-5">
-                  <h2 className="m-0 font-display text-[clamp(2rem,4vw,3.6rem)] font-[340] leading-[1.04] tracking-[-0.028em]">
+                  <h2 className="m-0 mt-6 font-display text-[clamp(2rem,4vw,3.6rem)] font-[340] leading-[1.04] tracking-[-0.028em]">
                     <Lines lines={[s.title]} />
                   </h2>
                   <R delay={100}>
-                    <Label className="mt-6 text-ink">{s.medium}</Label>
+                    <Label className="mt-6 text-ink">
+                      {s.medium} · {items.length} works
+                    </Label>
                     <div className="mt-4 flex flex-col gap-4 text-[1.02rem] text-ink-2">
                       {s.statement.map((p) => (
                         <p key={p} className="m-0 max-w-[58ch]">
@@ -72,12 +86,8 @@ export default function WorksPage() {
                     </R>
                   )}
                 </div>
-                <div className="grid grid-cols-2 items-start gap-4 lg:col-span-4">
-                  {shots.map((w, k) => (
-                    <R key={w.no} kind="clip" delay={k * 100} className={k === 0 ? "col-span-2" : ""}>
-                      <Photo src={w.photo} ratio={w.ratio} alt={`${w.title}, ${w.size}`} className="shadow-[0_12px_20px_rgba(70,50,30,0.2)]" />
-                    </R>
-                  ))}
+                <div className="lg:col-span-7">
+                  <WorksGallery seriesId={s.id} />
                 </div>
               </div>
             </Wrap>

@@ -1,17 +1,15 @@
 "use client";
 
 /**
- * The hero object: a real-looking sheet of birch bark, in WebGL (three.js).
- *  - bark, ink and the red seal are painted at run time (src/lib/bark.ts)
+ * The hero object: a sheet of birch bark in WebGL (three.js), carrying one of his own works (no. 02).
  *  - the bottom of the sheet is curled into a spiral roll
- *  - scrolling unrolls it; the ink is "written" when the page loads
+ *  - scrolling unrolls it into a flat sheet
  *  - the pointer tilts it a little
- * One canvas, no model files, no network requests.
+ * One canvas, no model files.
  */
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { makeBarkTextures, createComposer, SHEET_W, SHEET_L } from "@/lib/bark";
-import { scriptFontsReady } from "@/lib/art";
+import { makeSheetTextures, SHEET_W, SHEET_L } from "@/lib/bark";
 import { clamp, lerp, easeInOut, easeOutCubic } from "@/lib/rng";
 
 interface Props {
@@ -38,8 +36,7 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       onFail?.();
       return;
     }
-    const gl = renderer.getContext();
-    if (!gl) {
+    if (!renderer.getContext()) {
       onFail?.();
       return;
     }
@@ -64,8 +61,8 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     camera.position.set(0, 0.1, camDist);
 
     /* ---------------- light: a pale studio, warm key ---------------- */
-    scene.add(new THREE.HemisphereLight(0xfff6e6, 0xb4a386, 1.1));
-    const key = new THREE.DirectionalLight(0xffeed6, 2.05);
+    scene.add(new THREE.HemisphereLight(0xfff6e6, 0xcbb99a, 1.7));
+    const key = new THREE.DirectionalLight(0xffeed6, 2.5);
     key.position.set(3.2, 3.6, 4.6);
     if (!small) {
       key.castShadow = true;
@@ -97,10 +94,7 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     rig.visible = false;
 
     if (!small) {
-      const wall = new THREE.Mesh(
-        new THREE.PlaneGeometry(16, 12),
-        new THREE.ShadowMaterial({ opacity: 0.2, color: 0x5a4632 }),
-      );
+      const wall = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), new THREE.ShadowMaterial({ opacity: 0.2, color: 0x5a4632 }));
       wall.position.z = -0.22;
       wall.receiveShadow = true;
       pivot.add(wall);
@@ -146,22 +140,25 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
 
     const textures: THREE.Texture[] = [];
     const mats: THREE.Material[] = [];
-
-    /* ---------------- start once the script fonts are ready ---------------- */
-    const state = { p: progress.current.p, clock: 0, introT: 0, inkT: 0, sealT: 0, started: false };
+    const state = { p: progress.current.p, introT: 0, started: false };
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
-    let compose: ((ink: number, seal: number) => void) | null = null;
-    let colorTex: THREE.CanvasTexture | null = null;
 
+    /* ---------------- load his photograph, then show the sheet ---------------- */
     (async () => {
-      await scriptFontsReady();
+      const img = new Image();
+      img.src = "/media/hero-bark.webp";
+      try {
+        await img.decode();
+      } catch {
+        onFail?.();
+        return;
+      }
       if (disposed) return;
       const tw = small ? 768 : 1024;
       const th = Math.round((tw * SHEET_L) / SHEET_W);
-      const T = makeBarkTextures(tw, th);
-      compose = createComposer(T);
+      const T = makeSheetTextures(img, tw, th);
       const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-      const mk = (c: HTMLCanvasElement, srgb = true) => {
+      const mkTex = (c: HTMLCanvasElement, srgb = true) => {
         const t = new THREE.CanvasTexture(c);
         t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
         t.anisotropy = aniso;
@@ -169,22 +166,18 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
         textures.push(t);
         return t;
       };
-      colorTex = mk(T.color);
-      const bumpTex = mk(T.bump, false);
-      const backTex = mk(T.back);
-
       const frontMat = new THREE.MeshStandardMaterial({
-        map: colorTex,
-        bumpMap: bumpTex,
-        bumpScale: 1.1,
-        roughness: 0.92,
+        map: mkTex(T.color),
+        bumpMap: mkTex(T.bump, false),
+        bumpScale: 0.45,
+        roughness: 0.9,
         metalness: 0,
         alphaTest: 0.5,
         alphaToCoverage: true,
         side: THREE.FrontSide,
       });
       const backMat = new THREE.MeshStandardMaterial({
-        map: backTex,
+        map: mkTex(T.back),
         roughness: 0.96,
         metalness: 0,
         alphaTest: 0.5,
@@ -198,14 +191,7 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       front.receiveShadow = !small;
       back.receiveShadow = !small;
       sheet.add(back, front);
-
-      if (reduce) {
-        state.introT = 1;
-        state.inkT = 1;
-        state.sealT = 1;
-      }
-      compose(state.inkT, state.sealT);
-      colorTex.needsUpdate = true;
+      if (reduce) state.introT = 1;
       rig.visible = true;
       state.started = true;
     })();
@@ -254,26 +240,9 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       const target = progress.current.p;
       state.p += (target - state.p) * (1 - Math.exp(-dt * 8));
       if (Math.abs(target - state.p) < 0.0003) state.p = target;
+      if (state.started && !reduce) state.introT = Math.min(1, state.introT + dt / 1.6);
 
-      let needsInk = false;
-      if (state.started && !reduce) {
-        state.clock += dt;
-        state.introT = Math.min(1, state.introT + dt / 1.6);
-        if (state.clock > 0.45 && state.inkT < 1) {
-          state.inkT = Math.min(1, state.inkT + dt / 3.2);
-          needsInk = true;
-        }
-        if (state.inkT > 0.92 && state.sealT < 1) {
-          state.sealT = Math.min(1, state.sealT + dt / 0.55);
-          needsInk = true;
-        }
-      }
-      if (needsInk && compose && colorTex) {
-        compose(easeInOut(state.inkT), easeOutCubic(state.sealT));
-        colorTex.needsUpdate = true;
-      }
-
-      // scroll story: roll → flat plate
+      // scroll story: roll → flat sheet
       const e = easeInOut(clamp((state.p - 0.04) / 0.86));
       const s0 = lerp(SHEET_L * 0.5, SHEET_L, e);
       const bend = lerp(0.26, 0.04, e);

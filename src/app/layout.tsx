@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <noscript>
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important}[data-reveal]>div{clip-path:none!important}[data-lines] span span{transform:none!important}`}</style>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}[data-reveal]>div{clip-path:none!important}[data-lines] span span{transform:none!important}[data-scrub] span{opacity:1!important}`}</style>
         </noscript>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {/* faint paper grain */}
