@@ -194,39 +194,51 @@ export default function Home() {
         </Wrap>
       </Section>
 
-      {/* 08 — commissions */}
-      <Section className="border-t border-line">
+      {/* 08 — commissions, on an ink band for contrast */}
+      <section className="bg-ink py-[clamp(72px,9vw,140px)] text-paper">
         <Wrap>
-          <Head
-            no="08"
-            label="Commissions"
-            title={["A piece", em("written for you")]}
-            right={
-              <Btn href="/contact" solid>
-                Start a commission
-              </Btn>
-            }
-          />
-          <R className="mt-6 grid grid-cols-1 gap-x-8 lg:grid-cols-12">
-            <p className="m-0 max-w-[52ch] text-[1.08rem] text-ink-2 lg:col-span-6 lg:col-start-4">
-              Verses, names, prayers or poetry — composed and written by hand, in a classical script or a contemporary style.
-            </p>
-          </R>
-          <div className="mt-[clamp(32px,4vw,64px)] grid grid-cols-1 border-t border-line-strong sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-12">
+            <div className="lg:col-span-3">
+              <p className="m-0 flex items-center gap-3 font-mono text-[0.72rem] font-medium uppercase tracking-[0.1em] text-paper/60">
+                <span className="text-paper">08</span>
+                <span className="h-px w-8 bg-paper/40" />
+                <span>Commissions</span>
+              </p>
+            </div>
+            <div className="lg:col-span-9">
+              <h2 className="m-0 font-display text-[clamp(2.6rem,7vw,7rem)] font-[320] leading-[0.98] tracking-[-0.035em]">
+                <Lines lines={["A piece", <em key="e" className="font-light text-paper/55">written for you</em>]} />
+              </h2>
+              <R delay={120}>
+                <p className="mt-8 max-w-[52ch] text-[1.1rem] text-paper/70">
+                  Verses, names, prayers or poetry — composed and written by hand, in a classical script or a contemporary style.
+                </p>
+              </R>
+              <R delay={180} className="mt-10 flex flex-wrap gap-3">
+                <Btn href="/contact" solid dark>
+                  Start a commission
+                </Btn>
+                <Btn href="/works" dark>
+                  See the works
+                </Btn>
+              </R>
+            </div>
+          </div>
+          <div className="mt-[clamp(48px,7vw,104px)] grid grid-cols-1 border-t border-paper/25 sm:grid-cols-2 lg:grid-cols-4">
             {commissionSteps.map((s, i) => (
               <R
                 key={s.no}
                 delay={i * 90}
-                className="border-b border-line py-7 sm:pr-8 lg:border-b-0 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0"
+                className="border-b border-paper/15 py-7 sm:pr-8 lg:border-b-0 lg:border-r lg:border-paper/15 lg:px-8 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0"
               >
-                <Label>{s.no}</Label>
+                <Label className="text-paper/55">{s.no}</Label>
                 <h3 className="m-0 mt-4 font-display text-[1.6rem] font-[360] leading-[1.1] tracking-[-0.02em]">{s.title}</h3>
-                <p className="mt-3 text-[0.98rem] text-ink-2">{s.text}</p>
+                <p className="mt-3 text-[0.98rem] text-paper/65">{s.text}</p>
               </R>
             ))}
           </div>
         </Wrap>
-      </Section>
+      </section>
     </>
   );
 }

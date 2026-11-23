@@ -5,7 +5,6 @@ import "@fontsource-variable/inter-tight/index.css";
 import "@fontsource-variable/jetbrains-mono/index.css";
 import "@fontsource/aref-ruqaa/400.css";
 import "@fontsource/aref-ruqaa/700.css";
-import "@fontsource/noto-nastaliq-urdu/400.css";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -55,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {/* faint paper grain */}
-        <div aria-hidden className="pointer-events-none fixed inset-0 z-[100] bg-[url('/grain.svg')] opacity-40 mix-blend-multiply" />
+        <div aria-hidden className="pointer-events-none fixed inset-0 z-[100] bg-[url('/grain.svg')] opacity-[0.55]" />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[110] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"

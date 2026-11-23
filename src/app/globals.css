@@ -19,7 +19,7 @@
   --font-sans: "Inter Tight Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, Menlo, monospace;
   --font-script: "Aref Ruqaa", "Amiri", serif;
-  --font-urdu: "Noto Nastaliq Urdu", "Aref Ruqaa", serif;
+  --font-urdu: "Aref Ruqaa", "Amiri", serif;
 
   --spacing-gutter: clamp(20px, 4.2vw, 64px);
   --spacing-head: 68px;

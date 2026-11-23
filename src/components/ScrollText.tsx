@@ -47,7 +47,7 @@ export default function ScrollText({ text, className = "" }: { text: string; cla
   return (
     <p ref={box} aria-label={text} data-scrub className={className}>
       {words.map((w, i) => (
-        <span key={i} data-w aria-hidden style={{ opacity: 0.14 }} className="transition-opacity duration-300">
+        <span key={i} data-w aria-hidden style={{ opacity: 0.14 }}>
           {w}
           {i < words.length - 1 ? " " : ""}
         </span>

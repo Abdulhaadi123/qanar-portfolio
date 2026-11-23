@@ -20,19 +20,59 @@ export default function Header() {
   const meter = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    let last = window.scrollY;
-    const on = () => {
+    let lastY = window.scrollY;
+    let travel = 0; // distance scrolled in the current direction
+    let isSolid = false;
+    let isHidden = false;
+    let raf = 0;
+
+    const update = () => {
+      raf = 0;
       const y = window.scrollY;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      if (meter.current) meter.current.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
-      setSolid(y > 40);
-      setHidden(y > last + 4 && y > 520);
-      if (y < last - 4) setHidden(false);
-      last = y;
+      const dy = y - lastY;
+      lastY = y;
+
+      if (meter.current) {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        meter.current.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, y / max)) : 0})`;
+      }
+
+      const wantSolid = y > 40;
+      if (wantSolid !== isSolid) {
+        isSolid = wantSolid;
+        setSolid(wantSolid);
+      }
+
+      // Hide when the visitor has clearly scrolled down, show when they clearly scroll up.
+      // Small back-and-forth movements (trackpad momentum, a busy page) change nothing.
+      if (y < 240) {
+        travel = 0;
+        if (isHidden) {
+          isHidden = false;
+          setHidden(false);
+        }
+        return;
+      }
+      if (dy !== 0) travel = Math.sign(dy) === Math.sign(travel) ? travel + dy : dy;
+      if (!isHidden && travel > 120) {
+        isHidden = true;
+        travel = 0;
+        setHidden(true);
+      } else if (isHidden && travel < -48) {
+        isHidden = false;
+        travel = 0;
+        setHidden(false);
+      }
     };
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -48,10 +88,11 @@ export default function Header() {
 
   return (
     <>
+      {/* A solid bar: no blur behind it, so scrolling over the 3D scenes stays smooth. */}
       <header
-        className={`fixed inset-x-0 top-0 z-60 h-head border-b transition-[background-color,transform,border-color] duration-500 ${
-          solid ? "border-line bg-paper/90 backdrop-blur-md" : "border-transparent"
-        } ${hidden && !open ? "-translate-y-full" : ""}`}
+        className={`fixed inset-x-0 top-0 z-60 h-head border-b transition-[transform,background-color,border-color] duration-500 ease-expo ${
+          solid ? "border-line bg-paper" : "border-transparent bg-transparent"
+        } ${hidden && !open ? "-translate-y-full" : "translate-y-0"}`}
       >
         <div className="mx-auto flex h-full max-w-[1544px] items-center justify-between gap-6 px-gutter">
           <Link href="/" className="inline-flex items-baseline gap-3" aria-label="Qamar Abbas, home">

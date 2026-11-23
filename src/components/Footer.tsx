@@ -93,7 +93,7 @@ export default function Footer() {
 
         <div className="mt-[clamp(40px,6vw,80px)] flex flex-wrap items-end justify-between gap-4 border-t border-line pt-5">
           <Label>© 2026 {site.name}. All artworks reproduced with permission of the artist.</Label>
-          <p lang="ur" dir="rtl" className="font-urdu text-[1.5rem] leading-[1.9] text-ink-2">
+          <p lang="ur" dir="rtl" className="font-script text-[1.7rem] leading-[1.6] text-ink-2">
             {site.nameUrdu}
           </p>
         </div>

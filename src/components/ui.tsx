@@ -108,21 +108,26 @@ const btnBase =
   "group/btn inline-flex items-center gap-[0.7em] border px-6 py-[0.95em] font-mono text-[0.74rem] uppercase tracking-[0.1em] transition-colors duration-300";
 const btnLine = "border-ink hover:bg-ink hover:text-paper";
 const btnSolid = "border-ink bg-ink text-paper hover:border-seal hover:bg-seal";
+const btnLineDark = "border-paper/70 text-paper hover:bg-paper hover:text-ink";
+const btnSolidDark = "border-paper bg-paper text-ink hover:border-seal hover:bg-seal hover:text-paper";
 
 export function Btn({
   href,
   children,
   solid,
   external,
+  dark,
   className = "",
 }: {
   href: string;
   children: ReactNode;
   solid?: boolean;
   external?: boolean;
+  /** for use on the ink-coloured band */
+  dark?: boolean;
   className?: string;
 }) {
-  const cls = `${btnBase} ${solid ? btnSolid : btnLine} ${className}`;
+  const cls = `${btnBase} ${dark ? (solid ? btnSolidDark : btnLineDark) : solid ? btnSolid : btnLine} ${className}`;
   const arrow = <span className="transition-transform duration-300 group-hover/btn:translate-x-1">→</span>;
   if (external) {
     return (

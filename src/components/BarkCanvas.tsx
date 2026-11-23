@@ -2,10 +2,14 @@
 
 /**
  * The hero object: a sheet of birch bark in WebGL (three.js), carrying one of his own works (no. 02).
- *  - the bottom of the sheet is curled into a spiral roll
- *  - scrolling unrolls it into a flat sheet
- *  - the pointer tilts it a little
- * One canvas, no model files.
+ *
+ * The scroll story has three stages (progress 0 → 1 over the hero's runway):
+ *   1. 0.00 – 0.32  the roll opens into a flat sheet
+ *   2. 0.28 – 0.78  the sheet comes forward, turns toward the viewer and settles in the middle
+ *   3. 0.86 – 1.00  it lifts away as the page moves on
+ *
+ * Cheap on purpose: no shadow map, a modest mesh, pixel ratio capped, and a frame is drawn only
+ * when something actually changed (the page is still, the scene is still, the GPU is idle).
  */
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -16,6 +20,19 @@ interface Props {
   progress: { current: { p: number } };
   onReady?: () => void;
   onFail?: () => void;
+}
+
+/** a soft dark blob used as the sheet's shadow on the wall behind it */
+function softShadow() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const x = c.getContext("2d")!;
+  x.shadowColor = "#000";
+  x.shadowBlur = 18;
+  x.shadowOffsetX = 400;
+  x.fillStyle = "#000";
+  x.fillRect(30 - 400, 24, 68, 80);
+  return new THREE.CanvasTexture(c);
 }
 
 export default function BarkCanvas({ progress, onReady, onFail }: Props) {
@@ -45,11 +62,9 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     let raf = 0;
     let visible = true;
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.25 : 1.6));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = !small;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
     const canvas = renderer.domElement;
     canvas.style.cssText = "display:block;width:100%;height:100%;opacity:0;transition:opacity .9s ease";
     canvas.setAttribute("aria-hidden", "true");
@@ -64,27 +79,13 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     scene.add(new THREE.HemisphereLight(0xfff6e6, 0xcbb99a, 1.7));
     const key = new THREE.DirectionalLight(0xffeed6, 2.5);
     key.position.set(3.2, 3.6, 4.6);
-    if (!small) {
-      key.castShadow = true;
-      key.shadow.mapSize.set(1024, 1024);
-      const sc = key.shadow.camera;
-      sc.left = -4;
-      sc.right = 4;
-      sc.top = 4;
-      sc.bottom = -4;
-      sc.near = 1;
-      sc.far = 16;
-      key.shadow.bias = -0.0005;
-      key.shadow.normalBias = 0.025;
-      key.shadow.radius = 5;
-    }
     scene.add(key);
     const rimLight = new THREE.DirectionalLight(0xe4ecff, 0.5);
     rimLight.position.set(-3.5, 1.5, -2);
     scene.add(rimLight);
 
     /* ---------------- groups ---------------- */
-    const pivot = new THREE.Group(); // layout: where on screen, how big
+    const pivot = new THREE.Group(); // layout and scroll: where on screen, how big
     const rig = new THREE.Group(); // motion: tilt, intro drop
     const sheet = new THREE.Group(); // centres the sheet on its own middle
     sheet.position.y = SHEET_L / 2 - 0.15;
@@ -93,16 +94,17 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     scene.add(pivot);
     rig.visible = false;
 
-    if (!small) {
-      const wall = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), new THREE.ShadowMaterial({ opacity: 0.2, color: 0x5a4632 }));
-      wall.position.z = -0.22;
-      wall.receiveShadow = true;
-      pivot.add(wall);
-    }
+    // the shadow on the wall: one soft quad behind the sheet
+    const shadowTex = softShadow();
+    const shadowMat = new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x4a3622, transparent: true, opacity: 0, depthWrite: false });
+    const shadowGeo = new THREE.PlaneGeometry(SHEET_W * 1.32, SHEET_L * 1.16);
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.position.set(0.2, -0.12, -0.3);
+    pivot.add(shadow);
 
     /* ---------------- geometry: a plane we bend by hand ---------------- */
-    const segU = small ? 36 : 60;
-    const segV = small ? 96 : 160;
+    const segU = small ? 24 : 36;
+    const segV = small ? 72 : 112;
     const geo = new THREE.PlaneGeometry(SHEET_W, SHEET_L, segU, segV);
     const pos = geo.attributes.position as THREE.BufferAttribute;
     const count = pos.count;
@@ -113,7 +115,7 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       baseS[i] = SHEET_L / 2 - pos.getY(i); // distance from the top edge
     }
     const R0 = 0.2; // inner radius of the roll
-    const GAP = 0.09; // spacing between turns, wide enough that the spiral shows at the ends
+    const GAP = 0.09; // spacing between turns
     const B = GAP / (Math.PI * 2);
     let lastS0 = -1;
     let lastBend = -1;
@@ -133,15 +135,15 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       }
       pos.needsUpdate = true;
       geo.computeVertexNormals();
-      geo.computeBoundingSphere();
       lastS0 = s0;
       lastBend = bend;
     };
 
-    const textures: THREE.Texture[] = [];
-    const mats: THREE.Material[] = [];
+    const textures: THREE.Texture[] = [shadowTex];
+    const mats: THREE.Material[] = [shadowMat];
     const state = { p: progress.current.p, introT: 0, started: false };
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    let dirty = true; // something changed that needs a new frame
 
     /* ---------------- load his photograph, then show the sheet ---------------- */
     (async () => {
@@ -154,10 +156,10 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
         return;
       }
       if (disposed) return;
-      const tw = small ? 768 : 1024;
+      const tw = small ? 640 : 1024;
       const th = Math.round((tw * SHEET_L) / SHEET_W);
       const T = makeSheetTextures(img, tw, th);
-      const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      const aniso = Math.min(4, renderer.capabilities.getMaxAnisotropy());
       const mkTex = (c: HTMLCanvasElement, srgb = true) => {
         const t = new THREE.CanvasTexture(c);
         t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
@@ -173,7 +175,7 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
         roughness: 0.9,
         metalness: 0,
         alphaTest: 0.5,
-        alphaToCoverage: true,
+        alphaToCoverage: !small,
         side: THREE.FrontSide,
       });
       const backMat = new THREE.MeshStandardMaterial({
@@ -181,41 +183,49 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
         roughness: 0.96,
         metalness: 0,
         alphaTest: 0.5,
-        alphaToCoverage: true,
+        alphaToCoverage: !small,
         side: THREE.BackSide,
       });
       mats.push(frontMat, backMat);
-      const front = new THREE.Mesh(geo, frontMat);
-      const back = new THREE.Mesh(geo, backMat);
-      front.castShadow = !small;
-      front.receiveShadow = !small;
-      back.receiveShadow = !small;
-      sheet.add(back, front);
+      sheet.add(new THREE.Mesh(geo, backMat), new THREE.Mesh(geo, frontMat));
       if (reduce) state.introT = 1;
       rig.visible = true;
       state.started = true;
+      dirty = true;
     })();
 
     /* ---------------- layout ---------------- */
+    let baseScale = 1;
+    let baseX = 0;
+    let baseY = 0;
+    let wide = true;
+    let vhWorld = 1;
     const layout = () => {
       const w = el.clientWidth || 1;
       const h = el.clientHeight || 1;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      const vh = 2 * camDist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-      const vw = vh * camera.aspect;
-      const wide = camera.aspect > 1.1;
+      vhWorld = 2 * camDist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const vw = vhWorld * camera.aspect;
+      wide = camera.aspect > 1.1;
       // wide: object on the right, text on the left. narrow: object above, text below.
-      const fit = Math.min(1.12, ((wide ? 0.4 : 0.62) * vw) / SHEET_W, ((wide ? 0.86 : 0.5) * vh) / (SHEET_L + 0.3));
-      pivot.scale.setScalar(fit);
-      pivot.position.set(wide ? vw * 0.2 : 0, wide ? -0.05 : vh * 0.08, 0);
+      // narrow screens: the sheet stays in the upper 40% so the words below never sit on it
+      baseScale = wide
+        ? Math.min(1.12, (0.4 * vw) / SHEET_W, (0.86 * vhWorld) / (SHEET_L + 0.3))
+        : Math.min(1.12, (0.62 * vw) / SHEET_W, (0.37 * vhWorld) / SHEET_L);
+      baseX = wide ? vw * 0.2 : 0;
+      baseY = wide ? -0.05 : vhWorld * 0.22;
+      dirty = true;
     };
     layout();
     const ro = new ResizeObserver(layout);
     ro.observe(el);
 
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0 });
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) dirty = true;
+    });
     io.observe(el);
 
     const onMove = (e: PointerEvent) => {
@@ -224,9 +234,10 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     };
     if (finePointer && !reduce) window.addEventListener("pointermove", onMove, { passive: true });
 
-    /* ---------------- loop ---------------- */
+    /* ---------------- loop: cheap checks every frame, a draw only on change ---------------- */
     let last = performance.now();
     let revealed = false;
+    let sig = "";
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       if (!visible || document.hidden) {
@@ -235,26 +246,39 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       }
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      const time = now / 1000;
 
       const target = progress.current.p;
-      state.p += (target - state.p) * (1 - Math.exp(-dt * 8));
-      if (Math.abs(target - state.p) < 0.0003) state.p = target;
-      if (state.started && !reduce) state.introT = Math.min(1, state.introT + dt / 1.6);
+      state.p += (target - state.p) * (1 - Math.exp(-dt * 9));
+      if (Math.abs(target - state.p) < 0.0004) state.p = target;
+      if (state.started && !reduce && state.introT < 1) state.introT = Math.min(1, state.introT + dt / 1.5);
+      pointer.x += (pointer.tx - pointer.x) * 0.08;
+      pointer.y += (pointer.ty - pointer.y) * 0.08;
+      if (Math.abs(pointer.tx - pointer.x) < 0.001) pointer.x = pointer.tx;
+      if (Math.abs(pointer.ty - pointer.y) < 0.001) pointer.y = pointer.ty;
 
-      // scroll story: roll → flat sheet
-      const e = easeInOut(clamp((state.p - 0.04) / 0.86));
+      const p = state.p;
+      const e = easeInOut(clamp(p / 0.32)); // stage 1: unroll
+      const z = easeInOut(clamp((p - 0.28) / 0.5)); // stage 2: come forward and turn
+      const out = easeInOut(clamp((p - 0.86) / 0.14)); // stage 3: lift away
+      const intro = easeOutCubic(state.introT);
+
+      // nothing moved? then do nothing
+      const next = [e, z, out, intro, pointer.x, pointer.y, baseScale].map((v) => v.toFixed(4)).join("|");
+      if (!dirty && next === sig) return;
+      sig = next;
+      dirty = false;
+
       const s0 = lerp(SHEET_L * 0.5, SHEET_L, e);
       const bend = lerp(0.26, 0.04, e);
-      if (Math.abs(s0 - lastS0) > 0.0006 || Math.abs(bend - lastBend) > 0.0006) deform(s0, bend);
+      if (Math.abs(s0 - lastS0) > 0.0015 || Math.abs(bend - lastBend) > 0.0015) deform(s0, bend);
 
-      pointer.x += (pointer.tx - pointer.x) * 0.06;
-      pointer.y += (pointer.ty - pointer.y) * 0.06;
-      const intro = easeOutCubic(state.introT);
+      pivot.scale.setScalar(baseScale * (1 + (wide ? 0.22 : 0.08) * z));
+      pivot.position.set(baseX * (1 - 0.5 * z), baseY + (wide ? 0 : vhWorld * 0.02 * z) + out * vhWorld * 0.22, 0);
       rig.position.y = (1 - intro) * 0.6;
-      rig.rotation.y = lerp(-0.52, 0, e) + pointer.x * 0.16 + Math.sin(time * 0.55) * 0.025 * (1 - e * 0.6);
-      rig.rotation.x = lerp(0.07, 0, e) - pointer.y * 0.07 + Math.sin(time * 0.43) * 0.012;
-      rig.rotation.z = lerp(-0.035, 0, e);
+      rig.rotation.y = lerp(-0.52, 0, e) - 0.14 * z + pointer.x * 0.14;
+      rig.rotation.x = lerp(0.07, 0, e) + 0.05 * z - pointer.y * 0.06;
+      rig.rotation.z = lerp(-0.035, 0, e) + 0.02 * z;
+      shadowMat.opacity = 0.24 * intro * (1 - out);
 
       renderer.render(scene, camera);
       if (!revealed && state.started) {
@@ -272,15 +296,9 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       io.disconnect();
       window.removeEventListener("pointermove", onMove);
       geo.dispose();
+      shadowGeo.dispose();
       mats.forEach((m) => m.dispose());
       textures.forEach((t) => t.dispose());
-      scene.traverse((o) => {
-        const m = o as THREE.Mesh;
-        if (m.isMesh && m.geometry !== geo) {
-          m.geometry.dispose();
-          (m.material as THREE.Material).dispose();
-        }
-      });
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();

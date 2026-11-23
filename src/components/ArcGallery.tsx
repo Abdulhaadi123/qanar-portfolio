@@ -78,7 +78,7 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
       cb.current.onFail?.();
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.4 : 1.6));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     const canvas = renderer.domElement;
@@ -157,6 +157,7 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
     let downX = 0;
     let downRot = 0;
     let moved = 0;
+    let lastSig = ""; // what the last drawn frame looked like; a frame is only drawn when this changes
 
     const nearestIndex = (angle: number) => {
       let best = 0;
@@ -185,6 +186,7 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
       const w = el.clientWidth || 1;
       const h = el.clientHeight || 1;
       renderer.setSize(w, h, false);
+      lastSig = "";
       camera.aspect = w / h;
       // the front work fills about 80% of the height
       camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan((H * 1.22) / 2 / DIST));
@@ -193,7 +195,13 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
     layout();
     const ro = new ResizeObserver(layout);
     ro.observe(el);
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0 });
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting;
+        if (visible) lastSig = "";
+      },
+      { threshold: 0 },
+    );
     io.observe(el);
 
     /* ---------------- pointer: drag, hover, click ---------------- */
@@ -294,9 +302,13 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
         const target = i === hover && i !== activeIdx ? 1.04 : 1;
         const sc = s.group.scale.x + (target - s.group.scale.x) * 0.12;
         s.group.scale.setScalar(sc);
-        s.group.position.y = Math.sin(now / 1400 + i * 1.7) * 0.025 * (1 - ax * 0.5);
       });
 
+      // draw only when something is actually different from the last drawn frame
+      let sig = `${view.toFixed(4)}|${camera.position.x.toFixed(3)}|${camera.position.y.toFixed(3)}|${hover}`;
+      for (const s of slots) sig += `|${s.loaded.toFixed(2)}${s.group.scale.x.toFixed(3)}`;
+      if (sig === lastSig) return;
+      lastSig = sig;
       renderer.render(scene, camera);
     };
     raf = requestAnimationFrame(frame);
