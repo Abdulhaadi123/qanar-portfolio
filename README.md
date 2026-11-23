@@ -21,10 +21,9 @@ npm run build
 
 ## Adding the real photographs
 
-Until then each work is drawn from its own medium and size (`src/lib/plates.ts`). To use a real photograph:
-1. Put each file in `public/works/`, for example `public/works/07.jpg`.
-2. In `src/data/works.ts` add `photo: "/works/07.jpg"` to that work.
-   The gallery, the viewer and the true-size wall switch to the photograph by themselves.
+Until they exist, every work has a generated plate in `public/works/NN.webp` (drawn from its medium and size by `src/lib/plates.ts`).
+To use a real photograph, overwrite that file with the photo (same name, any size), or change `photo` in `src/data/works.ts`.
+The gallery, the viewer and the true-size wall switch over by themselves. The share card is `src/app/opengraph-image.jpg`.
 
 ## Portrait
 

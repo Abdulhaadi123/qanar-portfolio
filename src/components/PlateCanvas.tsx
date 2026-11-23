@@ -21,7 +21,7 @@ interface Props {
   className?: string;
 }
 
-/** Draws a plate into a canvas when it is near the screen. */
+/** Shows a plate image; without one it draws the plate into a canvas when near the screen. */
 export default function PlateCanvas({ style, seed, ratio, photo, alt, fixedW, maxW = 900, fill, className = "" }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -67,7 +67,7 @@ export default function PlateCanvas({ style, seed, ratio, photo, alt, fixedW, ma
       {!ready && !photo && <div className={skeleton} />}
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={photo} alt={alt} className="absolute inset-0 size-full object-cover" />
+        <img src={photo} alt={alt} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
       ) : (
         <canvas
           ref={canvas}

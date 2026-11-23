@@ -7,10 +7,10 @@ import PlateCanvas from "./PlateCanvas";
 import { Label, R } from "./ui";
 
 /** each body of work is drawn in its own medium (see src/lib/plates.ts) */
-const look: Record<string, { style: PlateStyle; seed: number }> = {
-  "echoes-on-birch": { style: "birch", seed: 411 },
-  "constitution-and-currency": { style: "currency", seed: 149 },
-  "needle-and-thread": { style: "embroidery", seed: 66 },
+const look: Record<string, { style: PlateStyle; seed: number; photo: string }> = {
+  "echoes-on-birch": { style: "birch", seed: 411, photo: "/works/series-birch.webp" },
+  "constitution-and-currency": { style: "currency", seed: 149, photo: "/works/series-currency.webp" },
+  "needle-and-thread": { style: "embroidery", seed: 66, photo: "/works/series-embroidery.webp" },
 };
 
 /** The three bodies of work: big type on ruled rows, with a small plate each. */
@@ -34,7 +34,7 @@ export default function SeriesList() {
             </div>
             <div className="col-start-3 row-span-2 row-start-1 overflow-hidden md:col-start-4 md:row-span-1">
               <div className="transition-transform duration-[900ms] ease-expo group-hover/row:scale-[1.07]">
-                <PlateCanvas style={look[s.slug].style} seed={look[s.slug].seed} ratio={0.8} alt={`${s.title}, drawn in its medium`} maxW={320} />
+                <PlateCanvas style={look[s.slug].style} seed={look[s.slug].seed} photo={look[s.slug].photo} ratio={0.8} alt={`${s.title}, drawn in its medium`} maxW={320} />
               </div>
             </div>
           </Link>

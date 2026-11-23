@@ -350,14 +350,25 @@ function plateWatercolour(ctx: CanvasRenderingContext2D, w: number, h: number, s
     ctx.lineWidth = 2.2 * u;
     ctx.stroke();
     if (li < 2) {
-      ctx.fillStyle = "rgba(250,248,242,0.55)";
+      // a soft wash of snow just under the ridge line, not a hard shape
+      ctx.save();
+      ctx.shadowColor = "rgba(250,248,242,0.5)";
+      ctx.shadowBlur = 10 * u;
+      ctx.strokeStyle = "rgba(250,248,242,0.38)";
+      ctx.lineWidth = 7 * u;
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      let pen = false;
       ys.forEach((y, i) => {
-        if (i % 4 === 0 && y < h * (L.y - L.amp * 0.5)) {
-          ctx.beginPath();
-          ctx.ellipse((i / n) * w, y + 10 * u, 16 * u, 7 * u, 0, 0, TAU);
-          ctx.fill();
-        }
+        const high = y < h * (L.y - L.amp * 0.45);
+        if (high) {
+          if (!pen) ctx.moveTo((i / n) * w, y + 6 * u);
+          else ctx.lineTo((i / n) * w, y + 6 * u);
+          pen = true;
+        } else pen = false;
       });
+      ctx.stroke();
+      ctx.restore();
     }
   });
   grain(ctx, w, h, bg, 0.07);

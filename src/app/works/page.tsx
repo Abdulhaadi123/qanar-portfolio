@@ -72,7 +72,7 @@ export default function WorksPage() {
               </R>
             </div>
             <R kind="clip" className="lg:col-span-4">
-              <PlateCanvas style="currency" seed={149} ratio={1.05} alt="Constitution and currency: guilloche and micro-text from the statement, struck through" maxW={640} />
+              <PlateCanvas style="currency" seed={149} photo="/works/constitution.webp" ratio={1.05} alt="Constitution and currency: guilloche and micro-text from the statement, struck through" maxW={640} />
               <Label className="mt-3">Micro-text: a phrase from the statement</Label>
             </R>
           </div>
@@ -101,7 +101,7 @@ export default function WorksPage() {
               </R>
             </div>
             <R kind="clip" className="lg:col-span-4">
-              <PlateCanvas style="embroidery" seed={66} ratio={0.85} alt="Mountains, sun and ibex horns in thread on dark cloth" maxW={640} />
+              <PlateCanvas style="embroidery" seed={66} photo="/works/needle.webp" ratio={0.85} alt="Mountains, sun and ibex horns in thread on dark cloth" maxW={640} />
               <Label className="mt-3">Mountains, sun and ibex, as in the statement</Label>
             </R>
           </div>

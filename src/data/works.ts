@@ -8,8 +8,9 @@
  * art convention is height × width, so hCm × wCm follows that order.
  * If one is the wrong way round, swap its hCm and wCm below.
  *
- * To add a photograph: put the file in /public/works and set `photo`,
- * for example  photo: "/works/07.jpg".
+ * Until real photographs exist, each work has a generated plate drawn from its medium
+ * (public/works/NN.webp). To use a real photograph, overwrite that file with the photo
+ * (any size; keep the same name) or point `photo` at another path in the list below.
  */
 import type { PlateStyle } from "@/lib/plates";
 
@@ -39,7 +40,7 @@ const IN = 2.54;
 const BIRCH = "Paper birch and archival ink marker";
 const PAPER = "Paper & archival ink marker";
 
-export const works: Work[] = [
+const listed: Omit<Work, "photo">[] = [
   { no: "01", title: "Untitled", size: "29.5 × 21.5 in", hCm: 29.5 * IN, wCm: 21.5 * IN, medium: BIRCH, group: "birch" },
   { no: "02", title: "Untitled", size: "29.5 × 21.5 in", hCm: 29.5 * IN, wCm: 21.5 * IN, medium: BIRCH, group: "birch" },
   { no: "03", title: "Untitled", size: "29.5 × 21.5 in", hCm: 29.5 * IN, wCm: 21.5 * IN, medium: BIRCH, group: "birch" },
@@ -58,6 +59,12 @@ export const works: Work[] = [
   { no: "16", title: "Untitled", size: "11.8 × 8.5 in", hCm: 11.8 * IN, wCm: 8.5 * IN, medium: PAPER, group: "marker" },
   { no: "17", title: "Untitled", size: "12 × 17 in", hCm: 12 * IN, wCm: 17 * IN, medium: "Watercolour on paper", group: "watercolour" },
 ];
+
+/**
+ * Each work points at its generated plate in /public/works/NN.webp (see src/lib/plates.ts).
+ * To use a real photograph, replace that file, or change the path here.
+ */
+export const works: Work[] = listed.map((w) => ({ ...w, photo: `/works/${w.no}.webp` }));
 
 export const worksByNo = (no: string) => works.find((w) => w.no === no);
 
