@@ -94,3 +94,10 @@ export const commissionSteps = [
 ];
 
 export const enquiryKinds = ["Buy an artwork", "Commission a piece", "Talk, class or collaboration", "Something else"];
+
+/**
+ * What the 3D sheet in the hero carries:
+ *  "drawn" – bark painted in the browser, his name written on in ink, then a red seal pressed (the original design)
+ *  "real"  – a photograph of one of his own works (no. 02) on the sheet
+ */
+export const heroSurface: "drawn" | "real" = "drawn";

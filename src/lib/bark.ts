@@ -14,7 +14,7 @@ export interface SheetTextures {
   back: HTMLCanvasElement;
 }
 
-function sheetPath(w: number, h: number, seed: number) {
+export function sheetPath(w: number, h: number, seed: number) {
   const r = mulberry32(seed);
   const u = Math.max(w, h) / 1500;
   const p = new Path2D();

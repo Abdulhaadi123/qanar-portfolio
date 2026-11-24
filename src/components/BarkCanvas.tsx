@@ -1,7 +1,9 @@
 "use client";
 
 /**
- * The hero object: a sheet of birch bark in WebGL (three.js), carrying one of his own works (no. 02).
+ * The hero object: a sheet of birch bark in WebGL (three.js).
+ *  - surface "drawn": bark painted at run time, his name written on in ink, then a red seal pressed
+ *  - surface "real": a photograph of one of his own works (no. 02) on the sheet
  *
  * The scroll story has three stages (progress 0 → 1 over the hero's runway):
  *   1. 0.00 – 0.32  the roll opens into a flat sheet
@@ -14,10 +16,13 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { makeSheetTextures, SHEET_W, SHEET_L } from "@/lib/bark";
+import { makeBarkTextures, createComposer } from "@/lib/drawnSheet";
+import { scriptFontsReady } from "@/lib/art";
 import { clamp, lerp, easeInOut, easeOutCubic } from "@/lib/rng";
 
 interface Props {
   progress: { current: { p: number } };
+  surface?: "drawn" | "real";
   onReady?: () => void;
   onFail?: () => void;
 }
@@ -35,7 +40,7 @@ function softShadow() {
   return new THREE.CanvasTexture(c);
 }
 
-export default function BarkCanvas({ progress, onReady, onFail }: Props) {
+export default function BarkCanvas({ progress, surface = "drawn", onReady, onFail }: Props) {
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -145,20 +150,39 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
     let dirty = true; // something changed that needs a new frame
 
-    /* ---------------- load his photograph, then show the sheet ---------------- */
+    /* ---------------- paint (or load) the sheet's surface, then show it ---------------- */
+    let compose: ((ink: number, seal: number) => void) | null = null;
+    let colorTex: THREE.CanvasTexture | null = null;
+    const ink = { clock: 0, t: 0, seal: 0 };
     (async () => {
-      const img = new Image();
-      img.src = "/media/hero-bark.webp";
-      try {
-        await img.decode();
-      } catch {
-        onFail?.();
-        return;
-      }
-      if (disposed) return;
       const tw = small ? 640 : 1024;
       const th = Math.round((tw * SHEET_L) / SHEET_W);
-      const T = makeSheetTextures(img, tw, th);
+      let color: HTMLCanvasElement;
+      let bump: HTMLCanvasElement;
+      let back: HTMLCanvasElement;
+      if (surface === "drawn") {
+        await scriptFontsReady();
+        if (disposed) return;
+        const T = makeBarkTextures(tw, th);
+        compose = createComposer(T);
+        ({ color, bump, back } = T);
+        if (reduce) {
+          ink.t = 1;
+          ink.seal = 1;
+        }
+        compose(ink.t, ink.seal);
+      } else {
+        const img = new Image();
+        img.src = "/media/hero-bark.webp";
+        try {
+          await img.decode();
+        } catch {
+          onFail?.();
+          return;
+        }
+        if (disposed) return;
+        ({ color, bump, back } = makeSheetTextures(img, tw, th));
+      }
       const aniso = Math.min(4, renderer.capabilities.getMaxAnisotropy());
       const mkTex = (c: HTMLCanvasElement, srgb = true) => {
         const t = new THREE.CanvasTexture(c);
@@ -168,10 +192,11 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
         textures.push(t);
         return t;
       };
+      colorTex = mkTex(color);
       const frontMat = new THREE.MeshStandardMaterial({
-        map: mkTex(T.color),
-        bumpMap: mkTex(T.bump, false),
-        bumpScale: 0.45,
+        map: colorTex,
+        bumpMap: mkTex(bump, false),
+        bumpScale: surface === "drawn" ? 1.0 : 0.45,
         roughness: 0.9,
         metalness: 0,
         alphaTest: 0.5,
@@ -179,7 +204,7 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
         side: THREE.FrontSide,
       });
       const backMat = new THREE.MeshStandardMaterial({
-        map: mkTex(T.back),
+        map: mkTex(back),
         roughness: 0.96,
         metalness: 0,
         alphaTest: 0.5,
@@ -251,6 +276,14 @@ export default function BarkCanvas({ progress, onReady, onFail }: Props) {
       state.p += (target - state.p) * (1 - Math.exp(-dt * 9));
       if (Math.abs(target - state.p) < 0.0004) state.p = target;
       if (state.started && !reduce && state.introT < 1) state.introT = Math.min(1, state.introT + dt / 1.5);
+      if (compose && colorTex && !reduce && (ink.t < 1 || ink.seal < 1)) {
+        ink.clock += dt;
+        if (ink.clock > 0.45 && ink.t < 1) ink.t = Math.min(1, ink.t + dt / 3.2);
+        if (ink.t > 0.92 && ink.seal < 1) ink.seal = Math.min(1, ink.seal + dt / 0.55);
+        compose(easeInOut(ink.t), easeOutCubic(ink.seal));
+        colorTex.needsUpdate = true;
+        dirty = true;
+      }
       pointer.x += (pointer.tx - pointer.x) * 0.08;
       pointer.y += (pointer.ty - pointer.y) * 0.08;
       if (Math.abs(pointer.tx - pointer.x) < 0.001) pointer.x = pointer.tx;

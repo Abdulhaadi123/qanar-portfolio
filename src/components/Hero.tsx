@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Btn, Label, Lines } from "./ui";
 import { clamp } from "@/lib/rng";
 import { mediumOf, worksByNo } from "@/data/works";
-import { site } from "@/data/site";
+import { heroSurface, site } from "@/data/site";
 
 const BarkCanvas = dynamic(() => import("./BarkCanvas"), { ssr: false });
 
@@ -92,7 +92,7 @@ export default function Hero() {
       ref={section}
       data-layout={layout}
       aria-label="Introduction"
-      className="group/hero relative h-[290svh] max-md:h-[240svh]"
+      className="group/hero relative h-[210svh] max-md:h-[190svh]"
     >
       <div className="sticky top-0 h-svh min-h-[560px] overflow-hidden bg-[radial-gradient(120%_90%_at_72%_48%,#f7f2e7_0%,#e9e0cc_52%,#d9cdb4_100%)] group-data-[layout=narrow]/hero:bg-[radial-gradient(130%_80%_at_50%_30%,#f7f2e7_0%,#e9e0cc_55%,#d9cdb4_100%)]">
         <div ref={stage} className="absolute inset-0">
@@ -101,19 +101,27 @@ export default function Hero() {
             aria-hidden
             className={`pointer-events-none absolute inset-0 grid place-items-center transition-opacity duration-700 ${ready ? "opacity-0" : ""}`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/media/hero-bark.webp"
-              alt=""
-              width={1024}
-              height={1536}
-              fetchPriority="high"
-              className="ml-[min(38vw,520px)] aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 object-cover drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]"
-            />
+            {heroSurface === "real" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src="/media/hero-bark.webp"
+                alt=""
+                width={1024}
+                height={1536}
+                fetchPriority="high"
+                className="ml-[min(38vw,520px)] aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 object-cover drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]"
+              />
+            ) : (
+              <div className="ml-[min(38vw,520px)] grid aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 place-items-center bg-[repeating-linear-gradient(0deg,rgb(60_44_32/0.07)_0_1px,transparent_1px_7px),linear-gradient(160deg,#f4eddf,#e6dbc4_60%,#d8c9ac)] drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]">
+                <span lang="ur" dir="rtl" className="font-script text-[clamp(3rem,9vh,6rem)]">
+                  قمر
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="absolute inset-0">
-            <BarkCanvas progress={progress} onReady={() => setReady(true)} />
+            <BarkCanvas progress={progress} surface={heroSurface} onReady={() => setReady(true)} />
           </div>
         </div>
 
@@ -174,17 +182,19 @@ export default function Hero() {
             </div>
           </div>
 
-          <div
-            ref={caption}
-            style={{ opacity: 0 }}
-            className="absolute bottom-[clamp(36px,8vh,92px)] right-gutter text-right will-change-transform group-data-[layout=narrow]/hero:hidden"
-          >
-            <Label className="text-ink">
-              No. {piece.no} · {piece.title}
-            </Label>
-            <Label className="mt-1.5 block">{mediumOf(piece)}</Label>
-            <Label className="mt-1.5 block">{piece.size}</Label>
-          </div>
+          {heroSurface === "real" && (
+            <div
+              ref={caption}
+              style={{ opacity: 0 }}
+              className="absolute bottom-[clamp(36px,8vh,92px)] right-gutter text-right will-change-transform group-data-[layout=narrow]/hero:hidden"
+            >
+              <Label className="text-ink">
+                No. {piece.no} · {piece.title}
+              </Label>
+              <Label className="mt-1.5 block">{mediumOf(piece)}</Label>
+              <Label className="mt-1.5 block">{piece.size}</Label>
+            </div>
+          )}
 
           {/* progress of the story */}
           <div aria-hidden className="absolute right-[calc(var(--spacing-gutter)/2-1px)] top-1/2 hidden h-28 w-px -translate-y-1/2 bg-line-strong/40 md:block">
