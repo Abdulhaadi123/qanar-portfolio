@@ -4,12 +4,10 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { Btn, Label, Lines } from "./ui";
 import { clamp } from "@/lib/rng";
-import { mediumOf, worksByNo } from "@/data/works";
-import { heroSurface, site } from "@/data/site";
+import { SHEET_L, SHEET_W } from "@/lib/bark";
+import { heroCaption, heroSurface, site } from "@/data/site";
 
 const BarkCanvas = dynamic(() => import("./BarkCanvas"), { ssr: false });
-
-const piece = worksByNo("02")!;
 
 /**
  * The first screen. The section is taller than the screen and its content is sticky,
@@ -106,13 +104,14 @@ export default function Hero() {
               <img
                 src="/media/hero-bark.webp"
                 alt=""
-                width={1024}
-                height={1536}
+                width={608}
+                height={732}
                 fetchPriority="high"
-                className="ml-[min(38vw,520px)] aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 object-cover drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]"
+                style={{ aspectRatio: SHEET_W / SHEET_L }}
+                className="ml-[min(38vw,520px)] w-[min(30vh,42vw)] -rotate-2 object-cover drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]"
               />
             ) : (
-              <div className="ml-[min(38vw,520px)] grid aspect-[2.3/3.45] w-[min(30vh,42vw)] -rotate-2 place-items-center bg-[repeating-linear-gradient(0deg,rgb(60_44_32/0.07)_0_1px,transparent_1px_7px),linear-gradient(160deg,#f4eddf,#e6dbc4_60%,#d8c9ac)] drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]">
+              <div className="ml-[min(38vw,520px)] grid w-[min(30vh,42vw)] -rotate-2 place-items-center bg-[repeating-linear-gradient(0deg,rgb(60_44_32/0.07)_0_1px,transparent_1px_7px),linear-gradient(160deg,#f4eddf,#e6dbc4_60%,#d8c9ac)] drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]">
                 <span lang="ur" dir="rtl" className="font-script text-[clamp(3rem,9vh,6rem)]">
                   قمر
                 </span>
@@ -182,17 +181,17 @@ export default function Hero() {
             </div>
           </div>
 
-          {heroSurface === "real" && (
+          {heroCaption && (
             <div
               ref={caption}
               style={{ opacity: 0 }}
               className="absolute bottom-[clamp(36px,8vh,92px)] right-gutter text-right will-change-transform group-data-[layout=narrow]/hero:hidden"
             >
               <Label className="text-ink">
-                No. {piece.no} · {piece.title}
+                No. {heroCaption.no} · {heroCaption.title}
               </Label>
-              <Label className="mt-1.5 block">{mediumOf(piece)}</Label>
-              <Label className="mt-1.5 block">{piece.size}</Label>
+              <Label className="mt-1.5 block">{heroCaption.medium}</Label>
+              <Label className="mt-1.5 block">{heroCaption.size}</Label>
             </div>
           )}
 

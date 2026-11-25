@@ -97,7 +97,10 @@ export const enquiryKinds = ["Buy an artwork", "Commission a piece", "Talk, clas
 
 /**
  * What the 3D sheet in the hero carries:
- *  "drawn" – bark painted in the browser, his name written on in ink, then a red seal pressed (the original design)
- *  "real"  – a photograph of one of his own works (no. 02) on the sheet
+ *  "real"  – the photograph at public/media/hero-bark.webp (a birch-bark work with mountains and ibex)
+ *  "drawn" – bark painted in the browser, his name written on in ink, then a red seal pressed
  */
-export const heroSurface: "drawn" | "real" = "drawn";
+export const heroSurface: "drawn" | "real" = "real";
+
+/** Caption shown beside the sheet while it is open. Null = none (the title and size of this photograph are not known). */
+export const heroCaption: { no: string; title: string; medium: string; size: string } | null = null;

@@ -32,6 +32,12 @@ Overwrite `public/works/NN.webp` with a better photograph (same name, any size),
 If that file is missing the site falls back to the Wix image, then to his name in calligraphy (`src/data/site.ts → portrait`).
 The share card is `src/app/opengraph-image.jpg` (also used for Twitter).
 
+## Hero sheet
+
+The 3D sheet carries `public/media/hero-bark.webp`. Replace it with a better photograph (any size; the sheet follows its proportions,
+set `SHEET_W` / `SHEET_L` in `src/lib/bark.ts` to match) and, if the title and size are known, fill `heroCaption` in `src/data/site.ts`.
+`heroSurface` there chooses between this photograph ("real") and a painted bark with his name in ink ("drawn").
+
 ## Contact form
 
 `/api/enquiry` forwards the message to `ENQUIRY_WEBHOOK_URL` (Slack, Formspree, Zapier, Make…) when it is set.
