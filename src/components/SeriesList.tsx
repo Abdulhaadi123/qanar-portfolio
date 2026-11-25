@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { series } from "@/data/series";
-import { worksByNo, worksOf } from "@/data/works";
+import { worksByNo, worksOf } from "@/lib/content/helpers";
+import type { Series, Work } from "@/lib/content/types";
 import Photo from "./Photo";
 import { Label, R } from "./ui";
 
 /**
- * The four series: big type on ruled rows. On a desktop a large photograph of the series
+ * The series: big type on ruled rows. On a desktop a large photograph of the series
  * follows the pointer while it is over a row; on a phone each row carries a small cover instead.
  */
-export default function SeriesList() {
+export default function SeriesList({ series, works }: { series: Series[]; works: Work[] }) {
   const [hover, setHover] = useState(-1);
   const follower = useRef<HTMLDivElement>(null);
 
@@ -43,7 +43,7 @@ export default function SeriesList() {
   return (
     <div className="border-t border-line-strong">
       {series.map((s, i) => {
-        const cover = worksByNo(s.cover)!;
+        const cover = s.cover ? worksByNo(works, s.cover) : undefined;
         return (
           <R key={s.slug} delay={i * 80}>
             <Link
@@ -58,7 +58,7 @@ export default function SeriesList() {
                   {s.title}
                 </h3>
                 <Label className="mt-3">
-                  {s.kind} · {worksOf(s.id).length} works
+                  {s.kind} · {worksOf(works, s.id).length} works
                 </Label>
               </div>
               <div className="col-start-2 row-start-2 md:col-start-3 md:row-start-1">
@@ -66,7 +66,7 @@ export default function SeriesList() {
                 <p className="m-0 mt-2 line-clamp-3 max-w-[46ch] text-[0.98rem] text-ink-2">{s.statement[0]}</p>
               </div>
               <div className="col-start-3 row-span-2 row-start-1 overflow-hidden md:hidden">
-                <Photo src={cover.photo} ratio={0.8} alt={`${s.title}: ${cover.title}`} />
+                {cover && <Photo src={cover.photoThumb} ratio={0.8} blur={cover.blur} alt={`${s.title}: ${cover.title}`} />}
               </div>
               <span className="hidden self-center text-[1.4rem] transition-transform duration-500 ease-expo group-hover/row:translate-x-1.5 md:block">→</span>
             </Link>
@@ -82,17 +82,23 @@ export default function SeriesList() {
           hover >= 0 ? "opacity-100" : "opacity-0"
         }`}
       >
-        {series.map((s, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={s.id}
-            src={worksByNo(s.cover)!.photo}
-            alt=""
-            className={`absolute inset-0 size-full object-cover transition-[opacity,transform] duration-500 ease-expo ${
-              hover === i ? "scale-100 opacity-100" : "scale-110 opacity-0"
-            }`}
-          />
-        ))}
+        {series.map((s, i) => {
+          const cover = s.cover ? worksByNo(works, s.cover) : undefined;
+          // the large picture is only fetched the first time its row is hovered; the small one is already there for the phone layout
+          return cover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={s.id}
+              src={cover.photoMd}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className={`absolute inset-0 size-full object-cover transition-[opacity,transform] duration-500 ease-expo ${
+                hover === i ? "scale-100 opacity-100" : "scale-110 opacity-0"
+              }`}
+            />
+          ) : null;
+        })}
       </div>
     </div>
   );

@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useRef, useState } from "react";
-import { mediumOf, selected } from "@/data/works";
-import { seriesById } from "@/data/series";
+import { mediumOf, seriesById } from "@/lib/content/helpers";
+import type { Series, Work } from "@/lib/content/types";
 import type { ArcHandle } from "./ArcGallery";
 import Lightbox from "./Lightbox";
 import { Label } from "./ui";
@@ -15,14 +15,15 @@ const ArcGallery = dynamic(() => import("./ArcGallery"), { ssr: false });
  * Until WebGL is ready (and if it never is) a plain sideways strip of the same photographs is shown,
  * in the same box, so nothing jumps.
  */
-export default function SelectedArc() {
+export default function SelectedArc({ selected, series, total }: { selected: Work[]; series: Series[]; total: number }) {
   const handle = useRef<ArcHandle | null>(null);
   const [active, setActive] = useState(0);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const close = useCallback(() => setOpen(null), []);
-  const w = selected[active];
-  const s = seriesById(w.series);
+  const w = selected[active] ?? selected[0];
+  const s = w ? seriesById(series, w.series) : undefined;
+  if (!w) return null;
 
   const btn =
     "grid size-12 place-items-center border border-ink font-mono text-[0.95rem] transition-colors duration-300 hover:bg-ink hover:text-paper";
@@ -39,7 +40,14 @@ export default function SelectedArc() {
           {selected.map((x, i) => (
             <button key={x.no} type="button" onClick={() => setOpen(i)} className="h-[78%] shrink-0 cursor-zoom-in" aria-label={`Open ${x.title}, no. ${x.no}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={x.photo} alt={`${x.title}, ${mediumOf(x)}, ${x.size}`} loading={i < 3 ? "eager" : "lazy"} className="h-full w-auto shadow-[0_14px_22px_rgba(70,50,30,0.22)]" />
+              <img
+                src={x.photoMd}
+                alt={`${x.title}, ${mediumOf(x)}, ${x.size}`}
+                loading={i < 3 ? "eager" : "lazy"}
+                decoding="async"
+                style={{ aspectRatio: x.ratio }}
+                className="h-full w-auto shadow-[0_14px_22px_rgba(70,50,30,0.22)]"
+              />
             </button>
           ))}
         </div>
@@ -52,7 +60,8 @@ export default function SelectedArc() {
             {w.title} <span className="text-ink-3">· No. {w.no}</span>
           </p>
           <p className="m-0 mt-1 text-[0.95rem] text-ink-2">
-            {s.title} · {mediumOf(w)} · {w.size}
+            {s ? `${s.title} · ` : ""}
+            {mediumOf(w)} · {w.size}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -73,7 +82,7 @@ export default function SelectedArc() {
         </div>
       </div>
 
-      {open !== null && <Lightbox items={selected} index={open} onClose={close} onIndex={setOpen} />}
+      {open !== null && selected[open] && <Lightbox items={selected} series={series} total={total} index={open} onClose={close} onIndex={setOpen} />}
     </>
   );
 }

@@ -1,23 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { series } from "@/data/series";
-import { hasSize, mediumOf, works, type SeriesId } from "@/data/works";
+import { hasSize, mediumOf, priceLabel } from "@/lib/content/helpers";
+import type { Series, SeriesId, Work } from "@/lib/content/types";
 import Wall, { FIG } from "./Wall";
 import { Btn, Label } from "./ui";
 
-const sized = works.filter(hasSize);
-
 /** The list of works beside a wall that shows the chosen one at its real size. */
-export default function ScaleWall() {
+export default function ScaleWall({ works, series }: { works: Work[]; series: Series[] }) {
+  const sized = useMemo(() => works.filter(hasSize), [works]);
   const [filter, setFilter] = useState<"all" | SeriesId>("all");
-  const [active, setActive] = useState(sized[0].no);
+  const [active, setActive] = useState(sized[0]?.no ?? "");
   const [touched, setTouched] = useState(false);
   const [inView, setInView] = useState(false);
   const wallBox = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const list = useMemo(() => (filter === "all" ? sized : sized.filter((w) => w.series === filter)), [filter]);
+  const list = useMemo(() => (filter === "all" ? sized : sized.filter((w) => w.series === filter)), [filter, sized]);
   const work = list.find((w) => w.no === active) ?? list[0];
   const count = (id: "all" | SeriesId) => (id === "all" ? sized.length : sized.filter((w) => w.series === id).length);
 
@@ -56,7 +55,13 @@ export default function ScaleWall() {
     listRef.current?.querySelector<HTMLButtonElement>(`[data-no="${next.no}"]`)?.focus();
   };
 
-  const chips: { id: "all" | SeriesId; label: string }[] = [{ id: "all", label: "All" }, ...series.map((s) => ({ id: s.id, label: s.title }))];
+  // only series that have a work with a fixed size get a filter
+  const chips: { id: "all" | SeriesId; label: string }[] = [
+    { id: "all", label: "All" },
+    ...series.filter((s) => sized.some((w) => w.series === s.id)).map((s) => ({ id: s.id, label: s.title })),
+  ];
+
+  if (!work) return null;
 
   return (
     <div className="grid grid-cols-1 gap-x-[clamp(32px,5vw,96px)] gap-y-10 lg:grid-cols-12">
@@ -115,7 +120,7 @@ export default function ScaleWall() {
               <p key={work.no} className="m-0 animate-fade font-display text-[1.5rem] tracking-[-0.02em]">
                 No. {work.no} <span className="text-ink-3">· {work.title}</span>
               </p>
-              <Label>Price on request</Label>
+              <Label>{priceLabel(work) === "On request" ? "Price on request" : priceLabel(work)}</Label>
             </div>
             <p className="m-0 mt-1 text-[0.95rem] text-ink-2">
               {mediumOf(work)} · {work.size}

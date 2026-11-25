@@ -1,7 +1,10 @@
 /**
  * Everything here comes from Qamar Abbas's own sources: his Wix portfolio site, his Lovable
  * draft site and, above all, his portfolio PDF. Nothing is invented. See CONTENT-SOURCES.md.
- * Edit this file to change the words on the site.
+ *
+ * This is the FIRST COPY of the content. The live site reads the database (edited in the admin panel at /admin);
+ * these files are what supabase/seed.sql was made from and what the site falls back to if the database cannot be reached
+ * (src/lib/content/fallback.ts). Changing them does not change the live site.
  */
 
 export const site = {

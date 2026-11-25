@@ -1,5 +1,9 @@
 # Where every piece of content came from
 
+> Since the admin panel was added, the live content is in the Supabase database and is edited at `/admin`.
+> `src/data/*.ts` is the first copy of it (what `supabase/seed.sql` was made from, and the fallback if the database cannot be reached).
+> The tables below say where that first copy came from.
+
 Three sources, all the artist's own:
 
 - **PDF** = his portfolio PDF, "For Portfolio click here" on the Wix site (38 pages, created in PowerPoint, 2026)

@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, type PointerEvent } from "react";
-import { cm, mediumOf, type Work } from "@/data/works";
+import { cm, mediumOf } from "@/lib/content/helpers";
+import type { Work } from "@/lib/content/types";
 import Photo from "./Photo";
 
 /*
   A gallery wall drawn to scale: the work at its real size beside a 175 cm figure.
-  Only for works with one fixed size (see hasSize in src/data/works.ts).
+  Only for works with one fixed size (see hasSize in src/lib/content/helpers.ts).
 */
 export const WALL_W = 320; // cm across
 const WALL_H = 240; // cm high (above the floor)
@@ -80,7 +81,7 @@ export default function Wall({ work, className = "" }: { work: Work; className?:
           style={{ left: `${left}%`, bottom: `${bottom}%`, width: `${pctX(w)}%`, height: `${pctY(h)}%` }}
         >
           <div className="size-full shadow-[0_14px_26px_rgba(60,40,20,0.28)]">
-            <Photo fill src={work.photo} ratio={work.ratio} alt={`${work.title}, ${mediumOf(work)}, at true size`} eager />
+            <Photo fill src={work.photoMd} ratio={work.ratio} blur={work.blur} alt={`${work.title}, ${mediumOf(work)}, at true size`} eager />
           </div>
 
           {/* dimension lines */}

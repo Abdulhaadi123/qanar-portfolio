@@ -3,15 +3,22 @@
 import { useEffect, useRef } from "react";
 import { Label, Wrap } from "./ui";
 
-/** Real numbers from his portfolio: 39 works, 4 series, 9 exhibitions and awards, first shown in 2014. */
-const stats = [
-  { to: 39, label: "Works", note: "photographed and listed" },
-  { to: 4, label: "Series", note: "birch, power, people, thread" },
-  { to: 9, label: "Exhibitions & awards", note: "Karachi to New York" },
-  { to: 2014, label: "First exhibition", note: "Karachi Arts Council", plain: true },
-];
+export interface StatsData {
+  works: number;
+  series: number;
+  shows: number;
+  firstYear: number | null;
+  firstPlace: string;
+}
 
-export default function Stats() {
+/** Real numbers from his portfolio, counted from the content: works, series, exhibitions and awards, the first exhibition. */
+export default function Stats({ data }: { data: StatsData }) {
+  const stats = [
+    { to: data.works, label: "Works", note: "photographed and listed" },
+    { to: data.series, label: "Series", note: "bodies of work" },
+    { to: data.shows, label: "Exhibitions & awards", note: "in his record" },
+    ...(data.firstYear !== null ? [{ to: data.firstYear, label: "First exhibition", note: data.firstPlace, plain: true }] : []),
+  ];
   const refs = useRef<(HTMLSpanElement | null)[]>([]);
   const box = useRef<HTMLDivElement>(null);
 
@@ -55,7 +62,8 @@ export default function Stats() {
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.works, data.series, data.shows, data.firstYear]);
 
   return (
     <section aria-label="In numbers" className="border-b border-line">

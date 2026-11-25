@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { seriesById } from "@/data/series";
-import { hasSize, mediumOf, works as allWorks, type Work } from "@/data/works";
+import { hasSize, mediumOf, priceLabel, seriesById } from "@/lib/content/helpers";
+import type { Series, Work } from "@/lib/content/types";
 import Photo from "./Photo";
 import Wall from "./Wall";
 import { Btn, Label } from "./ui";
@@ -10,18 +10,23 @@ import { Btn, Label } from "./ui";
 /** One work, large, with its details and its size on a wall. Esc closes, ← → move on. */
 export default function Lightbox({
   items,
+  series,
+  total,
   index,
   onClose,
   onIndex,
 }: {
   items: Work[];
+  series: Series[];
+  /** how many works the portfolio has in all (for "No. 06 / 39") */
+  total: number;
   index: number;
   onClose: () => void;
   onIndex: (i: number) => void;
 }) {
   const work = items[index];
   const closeBtn = useRef<HTMLButtonElement>(null);
-  const s = seriesById(work.series);
+  const s = seriesById(series, work.series);
 
   useEffect(() => {
     const prevFocus = document.activeElement as HTMLElement | null;
@@ -66,25 +71,33 @@ export default function Lightbox({
           style={{ width: `min(100%, calc((100svh - 190px) * ${work.ratio}))` }}
           className="animate-rise shadow-[0_26px_40px_rgba(70,50,30,0.28)]"
         >
-          <Photo src={work.photo} ratio={work.ratio} alt={`${work.title}, ${mediumOf(work)}, ${work.size}`} eager />
+          <Photo src={work.photo} ratio={work.ratio} blur={work.blur} alt={`${work.title}, ${mediumOf(work)}, ${work.size}`} eager />
         </div>
       </div>
 
       <aside className="flex flex-col gap-5 self-start lg:self-center">
         <Label>
-          No. <b className="text-ink">{work.no}</b> / {String(allWorks.length).padStart(2, "0")}
+          No. <b className="text-ink">{work.no}</b> / {String(total).padStart(2, "0")}
         </Label>
         <h2 className="m-0 font-display text-[clamp(2rem,3.4vw,3rem)] font-[340] leading-none tracking-[-0.03em]">{work.title}</h2>
         <dl className="m-0 border-t border-line-strong">
-          <div className={row}>
-            <dt className={dt}>Series</dt>
-            <dd className="m-0 text-right">
-              {s.kind} · {s.title}
-            </dd>
-          </div>
+          {s && (
+            <div className={row}>
+              <dt className={dt}>Series</dt>
+              <dd className="m-0 text-right">
+                {s.kind} · {s.title}
+              </dd>
+            </div>
+          )}
+          {work.year !== null && (
+            <div className={row}>
+              <dt className={dt}>Year</dt>
+              <dd className="m-0 text-right">{work.year}</dd>
+            </div>
+          )}
           <div className={row}>
             <dt className={dt}>Size</dt>
-            <dd className="m-0 text-right">{work.size}</dd>
+            <dd className="m-0 text-right">{work.size || "Not listed"}</dd>
           </div>
           <div className={row}>
             <dt className={dt}>Medium</dt>
@@ -92,9 +105,9 @@ export default function Lightbox({
           </div>
           <div className={row}>
             <dt className={dt}>Price</dt>
-            <dd className="m-0 text-right">{work.note === "Not available" ? "Not available" : "On request"}</dd>
+            <dd className="m-0 text-right">{priceLabel(work)}</dd>
           </div>
-          {work.note && work.note !== "Not available" && (
+          {work.note && (
             <div className={row}>
               <dt className={dt}>Note</dt>
               <dd className="m-0 text-right">{work.note}</dd>

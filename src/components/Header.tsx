@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { site } from "@/data/site";
 
 const links = [
   { href: "/works", label: "Works", no: "01" },
@@ -12,7 +11,7 @@ const links = [
   { href: "/contact", label: "Contact", no: "04" },
 ];
 
-export default function Header() {
+export default function Header({ name, email, base }: { name: string; email: string; base: string }) {
   const pathname = usePathname();
   const [solid, setSolid] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -95,8 +94,8 @@ export default function Header() {
         } ${hidden && !open ? "-translate-y-full" : "translate-y-0"}`}
       >
         <div className="mx-auto flex h-full max-w-[1544px] items-center justify-between gap-6 px-gutter">
-          <Link href="/" className="inline-flex items-baseline gap-3" aria-label="Qamar Abbas, home">
-            <span className="font-display text-[1.35rem] font-[420] tracking-[-0.02em]">{site.name}</span>
+          <Link href="/" className="inline-flex items-baseline gap-3" aria-label={`${name}, home`}>
+            <span className="font-display text-[1.35rem] font-[420] tracking-[-0.02em]">{name}</span>
             <span lang="ur" className="translate-y-px font-script text-[1.25rem] text-seal">
               قمر
             </span>
@@ -150,8 +149,8 @@ export default function Header() {
           ))}
         </nav>
         <div className="font-mono text-[0.74rem] uppercase tracking-[0.1em] text-ink-3">
-          <p className="m-0">{site.email}</p>
-          <p className="m-0 mt-1">{site.base}</p>
+          <p className="m-0">{email}</p>
+          <p className="m-0 mt-1">{base}</p>
         </div>
       </div>
     </>

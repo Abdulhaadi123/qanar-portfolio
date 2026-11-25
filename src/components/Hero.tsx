@@ -5,30 +5,45 @@ import { useEffect, useRef, useState } from "react";
 import { Btn, Label, Lines } from "./ui";
 import { clamp } from "@/lib/rng";
 import { SHEET_L, SHEET_W } from "@/lib/bark";
-import { heroCaption, heroSurface, site } from "@/data/site";
+import { splitLast, splitName } from "@/lib/content/helpers";
 
 const BarkCanvas = dynamic(() => import("./BarkCanvas"), { ssr: false });
+
+export interface HeroProps {
+  name: string;
+  nameUrdu: string;
+  role: string;
+  /** "Lahore / Gilgit-Baltistan" */
+  places: string;
+  tagline: string;
+  blurb: string;
+  /** the photograph on the 3D sheet (already cropped to the sheet's proportions) */
+  image: string;
+  /** the first series, shown in the second beat of the story */
+  series: { title: string; slug: string; kind: string } | null;
+}
 
 /**
  * The first screen. The section is taller than the screen and its content is sticky,
  * so scrolling does not move the page, it moves the story:
  *   0.00 – 0.32  the roll opens into a sheet; the headline gives way
- *   0.30 – 0.80  the sheet comes forward and turns; the series and the work's caption appear
+ *   0.30 – 0.80  the sheet comes forward and turns; the first series appears
  *   0.86 – 1.00  everything lifts away into the page
  * Progress (0 → 1) also goes to the 3D scene, which draws a frame only when it changes.
  *
  * Layout rule (shared with the 3D scene): wider than 1.1 : 1 → text left, object right.
  * Otherwise → object on top, text below.
  */
-export default function Hero() {
+export default function Hero({ name, nameUrdu, role, places, tagline, blurb, image, series }: HeroProps) {
   const section = useRef<HTMLElement>(null);
   const progress = useRef({ p: 0 });
   const intro = useRef<HTMLDivElement>(null);
   const urdu = useRef<HTMLDivElement>(null);
   const hint = useRef<HTMLDivElement>(null);
   const second = useRef<HTMLDivElement>(null);
-  const caption = useRef<HTMLDivElement>(null);
   const rail = useRef<HTMLSpanElement>(null);
+  const [first, surname] = splitName(name);
+  const [seriesHead, seriesTail] = series ? splitLast(series.title) : ["", ""];
   const stage = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [layout, setLayout] = useState<"wide" | "narrow">("wide");
@@ -64,11 +79,6 @@ export default function Hero() {
         second.current.style.opacity = String(k);
         second.current.style.transform = `translate3d(0,${(1 - clamp((p - 0.34) / 0.12)) * 32}px,0)`;
       }
-      if (caption.current) {
-        const k = clamp((p - 0.42) / 0.1) * (1 - clamp((p - 0.82) / 0.08));
-        caption.current.style.opacity = String(k);
-        caption.current.style.transform = `translate3d(0,${(1 - k) * 18}px,0)`;
-      }
       if (rail.current) rail.current.style.transform = `scaleY(${p})`;
       if (stage.current) stage.current.style.opacity = String(1 - clamp((p - 0.9) / 0.1) * 0.9);
     };
@@ -99,11 +109,12 @@ export default function Hero() {
             aria-hidden
             className={`pointer-events-none absolute inset-0 grid place-items-center transition-opacity duration-700 ${ready ? "opacity-0" : ""}`}
           >
-            {heroSurface === "real" ? (
+            {image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src="/media/hero-bark.webp"
+                src={image}
                 alt=""
+                crossOrigin="anonymous"
                 width={1100}
                 height={1468}
                 fetchPriority="high"
@@ -119,9 +130,7 @@ export default function Hero() {
             )}
           </div>
 
-          <div className="absolute inset-0">
-            <BarkCanvas progress={progress} surface={heroSurface} onReady={() => setReady(true)} />
-          </div>
+          <div className="absolute inset-0">{image && <BarkCanvas progress={progress} src={image} onReady={() => setReady(true)} />}</div>
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-[3]">
@@ -129,20 +138,24 @@ export default function Hero() {
             ref={intro}
             className="absolute inset-x-gutter top-[calc(var(--spacing-head)+clamp(28px,7vh,88px))] will-change-transform group-data-[layout=narrow]/hero:top-auto group-data-[layout=narrow]/hero:bottom-[clamp(28px,5vh,56px)]"
           >
-            <Label>Visual artist &amp; art educator · Lahore / Gilgit-Baltistan</Label>
+            <Label>{[role, places].filter(Boolean).join(" · ")}</Label>
             <h1 className="mt-[clamp(14px,2.4vh,28px)] max-w-[9ch] font-display text-[clamp(3.4rem,10.5vw,10.5rem)] font-[340] leading-[0.98] tracking-[-0.03em] group-data-[layout=narrow]/hero:max-w-none group-data-[layout=narrow]/hero:text-[clamp(2.8rem,13vw,5.2rem)]">
               <Lines
                 delay={150}
                 lines={[
-                  "Qamar",
-                  <em key="a" className="block pl-[0.9em] font-light text-ink-2">
-                    Abbas
-                  </em>,
+                  first,
+                  ...(surname
+                    ? [
+                        <em key="a" className="block pl-[0.9em] font-light text-ink-2">
+                          {surname}
+                        </em>,
+                      ]
+                    : []),
                 ]}
               />
             </h1>
             <p className="mt-[clamp(18px,3vh,36px)] max-w-[34ch] text-[clamp(1rem,1.35vw,1.2rem)] text-ink-2 group-data-[layout=narrow]/hero:mt-3 group-data-[layout=narrow]/hero:text-[0.98rem]">
-              Calligraphy on paper birch. Landscape, cultural memory, and the visual language of power.
+              {tagline}
             </p>
             <div className="pointer-events-auto mt-[clamp(22px,4vh,44px)] flex flex-wrap gap-3 group-data-[layout=narrow]/hero:mt-5">
               <Btn href="/works" solid>
@@ -154,7 +167,7 @@ export default function Hero() {
 
           <div ref={urdu} className="absolute bottom-[clamp(70px,10vh,120px)] right-gutter text-right group-data-[layout=narrow]/hero:hidden">
             <p lang="ur" dir="rtl" className="font-script text-[clamp(1.6rem,2.8vw,2.4rem)] leading-[1.6] text-ink-2">
-              {site.nameUrdu}
+              {nameUrdu}
             </p>
           </div>
 
@@ -163,35 +176,21 @@ export default function Hero() {
             <Label>Scroll to unroll</Label>
           </div>
 
-          {/* stage 2: the series, and the caption of the piece on the sheet */}
-          <div
-            ref={second}
-            style={{ opacity: 0 }}
-            className="absolute bottom-[clamp(36px,8vh,92px)] left-gutter max-w-[min(440px,calc(100%-var(--spacing-gutter)*2))] will-change-transform max-md:bottom-7"
-          >
-            <Label>Series 1</Label>
-            <p className="m-0 mt-3 font-display text-[clamp(2.2rem,4.6vw,4.4rem)] font-[340] leading-[1] tracking-[-0.03em]">
-              Echoes on <em className="font-light text-ink-2">Birch</em>
-            </p>
-            <p className="m-0 mt-3.5 max-w-[38ch] text-[0.98rem] text-ink-2">
-              Bhojpatra bark from the mountains of Gilgit-Baltistan, written on in Khat-e-Suls: landscape and cultural memory, one sheet at a time.
-            </p>
-            <div className="pointer-events-auto mt-6">
-              <Btn href="/works#echoes-on-birch">See the series</Btn>
-            </div>
-          </div>
-
-          {heroCaption && (
+          {/* stage 2: the first series */}
+          {series && (
             <div
-              ref={caption}
+              ref={second}
               style={{ opacity: 0 }}
-              className="absolute bottom-[clamp(36px,8vh,92px)] right-gutter text-right will-change-transform group-data-[layout=narrow]/hero:hidden"
+              className="absolute bottom-[clamp(36px,8vh,92px)] left-gutter max-w-[min(440px,calc(100%-var(--spacing-gutter)*2))] will-change-transform max-md:bottom-7"
             >
-              <Label className="text-ink">
-                No. {heroCaption.no} · {heroCaption.title}
-              </Label>
-              <Label className="mt-1.5 block">{heroCaption.medium}</Label>
-              <Label className="mt-1.5 block">{heroCaption.size}</Label>
+              <Label>{series.kind}</Label>
+              <p className="m-0 mt-3 font-display text-[clamp(2.2rem,4.6vw,4.4rem)] font-[340] leading-[1] tracking-[-0.03em]">
+                {seriesHead} <em className="font-light text-ink-2">{seriesTail}</em>
+              </p>
+              {blurb && <p className="m-0 mt-3.5 max-w-[38ch] text-[0.98rem] text-ink-2">{blurb}</p>}
+              <div className="pointer-events-auto mt-6">
+                <Btn href={`/works#${series.slug}`}>See the series</Btn>
+              </div>
             </div>
           )}
 

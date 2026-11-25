@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { posts, formatDate, type Post } from "@/data/journal";
+import { formatDate } from "@/lib/content/helpers";
+import type { Post } from "@/lib/content/types";
 import { Label, R } from "./ui";
 
-export default function PostRows({ items = posts }: { items?: Post[] }) {
+export default function PostRows({ items }: { items: Post[] }) {
   return (
     <div className="border-t border-line-strong">
       {items.map((p, i) => (
-        <R key={p.slug} delay={i * 70}>
+        <R key={p.id} delay={i * 70}>
           <Link
             href={`/journal/${p.slug}`}
             className="group/row grid grid-cols-1 items-baseline gap-x-7 gap-y-2 border-b border-line py-[clamp(22px,3vw,38px)] transition-[padding,background-color] duration-500 ease-expo hover:bg-paper-2/70 hover:px-3.5 md:grid-cols-[170px_minmax(0,1fr)_120px]"

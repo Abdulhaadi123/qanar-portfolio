@@ -1,19 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { site } from "@/data/site";
 
 /**
- * The studio portrait of Qamar Abbas from his Wix site.
- * Tries /media/portrait.jpg first, then the Wix image; until a photograph has loaded his name in calligraphy sits in its place.
+ * The studio portrait of the artist.
+ * Until the photograph has loaded a tiny blurred copy (and his name in calligraphy) sits in its place.
  * The photograph drifts a little against its frame as the page scrolls.
  */
-export default function Portrait({ className = "" }: { className?: string }) {
-  const [i, setI] = useState(0);
+export default function Portrait({ src, blur, className = "" }: { src: string; blur?: string; className?: string }) {
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLImageElement>(null);
-  const src = site.portrait[i];
 
   // the photograph can finish loading before React attaches onLoad (server-rendered page)
   useEffect(() => {
@@ -48,13 +46,19 @@ export default function Portrait({ className = "" }: { className?: string }) {
   }, []);
 
   return (
-    <div ref={box} className={`relative overflow-hidden bg-ink ${className}`}>
-      <div className="absolute inset-0 grid place-items-center">
-        <span lang="ur" dir="rtl" className="font-script text-[clamp(5rem,12vw,9rem)] leading-none text-paper/85">
-          قمر
-        </span>
-      </div>
-      {src && (
+    <div
+      ref={box}
+      style={blur ? { backgroundImage: `url("${blur}")`, backgroundSize: "cover", backgroundPosition: "50% 18%" } : undefined}
+      className={`relative overflow-hidden bg-ink ${className}`}
+    >
+      {!loaded && (
+        <div className="absolute inset-0 grid place-items-center">
+          <span lang="ur" dir="rtl" className="font-script text-[clamp(5rem,12vw,9rem)] leading-none text-paper/85">
+            قمر
+          </span>
+        </div>
+      )}
+      {src && !failed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           ref={img}
@@ -62,7 +66,7 @@ export default function Portrait({ className = "" }: { className?: string }) {
           src={src}
           alt="Qamar Abbas, visual artist, in a studio portrait"
           onLoad={() => setLoaded(true)}
-          onError={() => setI((n) => n + 1)}
+          onError={() => setFailed(true)}
           decoding="async"
           style={{ transform: "scale(1.14)" }}
           className={`absolute inset-0 size-full object-cover object-[50%_18%] transition-opacity duration-700 will-change-transform ${loaded ? "opacity-100" : "opacity-0"}`}

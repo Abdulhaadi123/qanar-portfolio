@@ -23,6 +23,8 @@ import { clamp, lerp, easeInOut, easeOutCubic } from "@/lib/rng";
 interface Props {
   progress: { current: { p: number } };
   surface?: "drawn" | "real";
+  /** the photograph on the sheet when surface is "real" (cropped to the sheet's proportions: see SHEET_W / SHEET_L) */
+  src?: string;
   onReady?: () => void;
   onFail?: () => void;
 }
@@ -40,7 +42,7 @@ function softShadow() {
   return new THREE.CanvasTexture(c);
 }
 
-export default function BarkCanvas({ progress, surface = "drawn", onReady, onFail }: Props) {
+export default function BarkCanvas({ progress, surface = "real", src = "/media/hero-bark.webp", onReady, onFail }: Props) {
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -175,7 +177,9 @@ export default function BarkCanvas({ progress, surface = "drawn", onReady, onFai
         compose(ink.t, ink.seal);
       } else {
         const img = new Image();
-        img.src = "/media/hero-bark.webp";
+        // a photograph from the storage host is read back from a canvas: it must be requested with CORS
+        img.crossOrigin = "anonymous";
+        img.src = src;
         try {
           await img.decode();
         } catch {

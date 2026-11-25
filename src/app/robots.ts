@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
-const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3210").replace(/\/$/, "");
+const base = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3210").replace(/\/$/, "");
 
 export default function robots(): MetadataRoute.Robots {
-  return { rules: { userAgent: "*", allow: "/", disallow: "/api/" }, sitemap: `${base}/sitemap.xml` };
+  return { rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/admin"] }, sitemap: `${base}/sitemap.xml` };
 }

@@ -6,26 +6,19 @@ import "@fontsource-variable/jetbrains-mono/index.css";
 import "@fontsource/aref-ruqaa/400.css";
 import "@fontsource/aref-ruqaa/700.css";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import RevealRoot from "@/components/RevealRoot";
-import { site } from "@/data/site";
+import { getContent } from "@/lib/content/queries";
 
-const description =
-  "Qamar Abbas is a visual artist born in 1997 in the Oshikhandass valley of Gilgit-Baltistan, based in Lahore. Birch bark and ink, constitution and currency, charcoal portraits of the mountain people, and embroidery.";
-
-export const metadata: Metadata = {
-  metadataBase: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : undefined,
-  title: { default: "Qamar Abbas — Visual artist & art educator", template: "%s — Qamar Abbas" },
-  description,
-  openGraph: {
-    type: "website",
-    title: "Qamar Abbas — Visual artist & art educator",
-    description,
-    siteName: site.name,
-  },
-  twitter: { card: "summary_large_image", title: "Qamar Abbas — Visual artist", description },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { site } = await getContent();
+  const title = `${site.name} — ${site.role}`;
+  return {
+    metadataBase: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : undefined,
+    title: { default: title, template: `%s — ${site.name}` },
+    description: site.seoDescription,
+    openGraph: { type: "website", title, description: site.seoDescription, siteName: site.name },
+    twitter: { card: "summary_large_image", title: `${site.name} — Visual artist`, description: site.seoDescription },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#f1ece1",
@@ -33,39 +26,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: site.name,
-  alternateName: site.nameUrdu,
-  jobTitle: "Visual artist and art educator",
-  email: site.email,
-  alumniOf: { "@type": "CollegeOrUniversity", name: "National College of Arts, Lahore" },
-  homeLocation: { "@type": "Place", name: site.base },
-  sameAs: site.socials.map((s) => s.href),
-};
-
+/** The shell shared by the public site and the admin panel. The public site's header, footer and effects are in SiteChrome. */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <noscript>
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important}[data-reveal]>div{clip-path:none!important}[data-lines] span span{transform:none!important}[data-scrub] span{opacity:1!important}`}</style>
-        </noscript>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        {/* faint paper grain */}
-        <div aria-hidden className="pointer-events-none fixed inset-0 z-[100] bg-[url('/grain.svg')] opacity-[0.55]" />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[110] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
-        >
-          Skip to content
-        </a>
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
-        <RevealRoot />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

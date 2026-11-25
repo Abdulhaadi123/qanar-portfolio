@@ -9,7 +9,7 @@
  */
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import type { Work } from "@/data/works";
+import type { Work } from "@/lib/content/types";
 import { clamp } from "@/lib/rng";
 
 export interface ArcHandle {
@@ -101,7 +101,9 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
       else acc += (widths[i - 1] / 2 + GAP + widths[i] / 2) / R, phi.push(acc);
     });
 
+    // photographs added in the admin panel come from the storage host, which allows cross-origin use as a texture
     const tex = new THREE.TextureLoader();
+    tex.setCrossOrigin("anonymous");
     const disposables: { dispose: () => void }[] = [];
     const shadowTex = shadowTexture();
     disposables.push(shadowTex);
@@ -127,7 +129,7 @@ export default function ArcGallery({ items, handle, onActive, onOpen, onReady, o
       scene.add(group);
       disposables.push(geo, photoMat, shadeMat, shade.geometry);
       const slot: Slot = { group, photo, shade, photoMat, shadeMat, loaded: 0, ready: false };
-      tex.load(w.photo, (t) => {
+      tex.load(w.photoMd, (t) => {
         t.colorSpace = THREE.SRGBColorSpace;
         t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
         photoMat.map = t;

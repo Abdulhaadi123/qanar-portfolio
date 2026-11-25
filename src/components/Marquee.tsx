@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { series } from "@/data/series";
-
 /**
  * Two bands of his series titles that slide sideways as the page scrolls, in opposite directions.
  * It follows the scroll position, so it never slows or hijacks the wheel.
  */
-export default function Marquee() {
+export default function Marquee({ titles }: { titles: string[] }) {
   const a = useRef<HTMLDivElement>(null);
   const b = useRef<HTMLDivElement>(null);
 
@@ -40,9 +38,9 @@ export default function Marquee() {
 
   const seq = (
     <span className="inline-flex shrink-0 items-center">
-      {series.map((s) => (
-        <span key={s.id} className="inline-flex items-center">
-          <span className="px-[0.35em]">{s.title}</span>
+      {titles.map((t, i) => (
+        <span key={i} className="inline-flex items-center">
+          <span className="px-[0.35em]">{t}</span>
           <i className="mx-[0.25em] inline-block size-[0.16em] rounded-full bg-seal" aria-hidden />
         </span>
       ))}
