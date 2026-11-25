@@ -104,8 +104,8 @@ export default function Hero() {
               <img
                 src="/media/hero-bark.webp"
                 alt=""
-                width={608}
-                height={732}
+                width={1100}
+                height={1468}
                 fetchPriority="high"
                 style={{ aspectRatio: SHEET_W / SHEET_L }}
                 className="ml-[min(38vw,520px)] w-[min(30vh,42vw)] -rotate-2 object-cover drop-shadow-[18px_24px_22px_rgba(80,60,40,0.28)] [clip-path:polygon(0_1%,8%_0,22%_1.4%,40%_0.3%,58%_1.6%,76%_0.4%,100%_1%,99%_40%,100%_100%,0_100%,1%_60%)] group-data-[layout=narrow]/hero:-mt-[18vh] group-data-[layout=narrow]/hero:ml-0 group-data-[layout=narrow]/hero:w-[min(40vw,22vh)]"

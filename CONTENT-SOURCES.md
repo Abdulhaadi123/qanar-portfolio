@@ -39,7 +39,7 @@ a caption were cropped to the artwork; all were converted to WebP (long side at 
 
 | On this site | What |
 |---|---|
-| The photograph on the hero's 3D bark sheet (`public/media/hero-bark.webp`) | A birch-bark work with mountains and ibex, received as a WhatsApp screenshot on 2026-11-25. Only the picture itself was cropped out (no chat button or time), enlarged 2x, sharpened and brightened a little. Its title, size and series are not known, so the hero shows no caption. **It is low-resolution: replace the file with the original "HD" image for a sharper sheet.** |
+| The photograph on the hero's 3D bark sheet (`public/media/hero-bark.webp`) | A birch-bark work (mountains, ibex and a man waving), sent as a full-resolution photograph (1506 × 2000) on 2026-11-25. Trimmed to the bark, slightly lifted in contrast and converted to WebP. Its title, size and series are not known, so the hero shows no caption. |
 
 ## From the Lovable site
 
@@ -48,8 +48,8 @@ the three journal articles with their dates, and the footer line "All artworks r
 
 ## Made for this site (not from any source)
 
-- Design, layout, colours, typography, motion, and the 3D sheet in the hero. The sheet is a drawn bark surface carrying the photograph
-  above; `heroSurface = "drawn"` in `src/data/site.ts` switches it to a painted bark with his name, قمر عباس, written in ink.
+- Design, layout, colours, typography, motion, and the 3D sheet in the hero (a bent plane carrying the photograph above).
+  `heroSurface = "drawn"` in `src/data/site.ts` switches it to a painted bark with his name, قمر عباس, written in ink.
 - The **true-size wall**: it draws each work at the size written in the PDF next to a 175 cm figure. Height and width are ordered to
   match each photograph.
 - Names for series 2, 3 and 4. The PDF only numbers them; "Constitution & Currency", "Mountain Portraits" and "Needle & Thread" are labels

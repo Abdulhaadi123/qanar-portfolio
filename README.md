@@ -34,9 +34,9 @@ The share card is `src/app/opengraph-image.jpg` (also used for Twitter).
 
 ## Hero sheet
 
-The 3D sheet carries `public/media/hero-bark.webp`. Replace it with a better photograph (any size; the sheet follows its proportions,
-set `SHEET_W` / `SHEET_L` in `src/lib/bark.ts` to match) and, if the title and size are known, fill `heroCaption` in `src/data/site.ts`.
-`heroSurface` there chooses between this photograph ("real") and a painted bark with his name in ink ("drawn").
+The 3D sheet carries `public/media/hero-bark.webp`. To change it, replace that file (any size; set `SHEET_W` / `SHEET_L` in
+`src/lib/bark.ts` to the photograph's proportions) and, if the title and size are known, fill `heroCaption` in `src/data/site.ts`.
+`heroSurface` there chooses between the photograph ("real") and a painted bark with his name in ink ("drawn").
 
 ## Contact form
 

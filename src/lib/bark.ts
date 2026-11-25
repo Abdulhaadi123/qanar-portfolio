@@ -6,7 +6,7 @@
 import { mulberry32 } from "./rng";
 
 export const SHEET_W = 2.5;
-export const SHEET_L = 3.0;
+export const SHEET_L = 3.34;
 
 export interface SheetTextures {
   color: HTMLCanvasElement;
@@ -53,20 +53,6 @@ export function makeSheetTextures(img: HTMLImageElement, w: number, h: number): 
   const color = mk(w, h);
   const cctx = color.getContext("2d")!;
   cctx.drawImage(img, 0, 0, w, h);
-  // fine fibres over the photograph: the source picture is small, this keeps the surface crisp when enlarged
-  const fr = mulberry32(11);
-  const fu = Math.max(w, h) / 1000;
-  cctx.lineCap = "round";
-  for (let i = 0; i < 2600; i++) {
-    const x = fr() * w;
-    const y = fr() * h;
-    cctx.strokeStyle = fr() > 0.5 ? `rgba(120,86,50,${0.015 + fr() * 0.035})` : `rgba(255,248,230,${0.04 + fr() * 0.07})`;
-    cctx.lineWidth = (0.5 + fr() * 1.0) * fu;
-    cctx.beginPath();
-    cctx.moveTo(x, y);
-    cctx.lineTo(x + (fr() - 0.5) * 3 * fu, y + (10 + fr() * 60) * fu); // bark fibres run along the sheet
-    cctx.stroke();
-  }
   // a little darkening toward the edges, as light falls off on a real sheet
   const vg = cctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
   vg.addColorStop(0, "rgba(90,66,44,0)");

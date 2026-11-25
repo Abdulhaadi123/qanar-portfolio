@@ -81,8 +81,10 @@ export default function BarkCanvas({ progress, surface = "drawn", onReady, onFai
     camera.position.set(0, 0.1, camDist);
 
     /* ---------------- light: a pale studio, warm key ---------------- */
-    scene.add(new THREE.HemisphereLight(0xfff6e6, 0xcbb99a, 1.7));
-    const key = new THREE.DirectionalLight(0xffeed6, 2.5);
+    // a photograph is already lit; the light only needs to shape it, not brighten it
+    const boost = surface === "real" ? 1.22 : 1;
+    scene.add(new THREE.HemisphereLight(0xfff6e6, 0xcbb99a, 1.7 * boost));
+    const key = new THREE.DirectionalLight(0xffeed6, 2.5 * boost);
     key.position.set(3.2, 3.6, 4.6);
     scene.add(key);
     const rimLight = new THREE.DirectionalLight(0xe4ecff, 0.5);
